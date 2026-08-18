@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LogOut, Settings, Users, Video } from "lucide-react";
+import { LogOut, Settings, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { logoutAction } from "@/lib/actions/auth";
@@ -12,9 +12,11 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex flex-1 flex-col">
       <header className="glass-panel mx-4 mt-4 flex items-center justify-between rounded-2xl px-4 py-3">
-        <Link href="/" className="flex items-center gap-2">
-          <Video className="size-5 text-primary" />
-          <span className="font-semibold">Reunião</span>
+        <Link href="/" className="flex items-center gap-2.5">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/matter-logo.png" alt="Matter" className="h-6 w-auto" />
+          <span className="h-4 w-px bg-border" />
+          <span className="text-sm text-muted-foreground">Reunião</span>
         </Link>
         <nav className="flex items-center gap-1">
           {isAdmin && (
