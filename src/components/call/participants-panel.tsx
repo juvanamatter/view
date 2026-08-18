@@ -9,7 +9,7 @@ export function ParticipantsPanel({ onClose }: { onClose: () => void }) {
   const { raisedIdentities } = useHandRaise();
 
   return (
-    <div className="glass-panel absolute right-0 bottom-full mb-3 flex max-h-96 w-72 flex-col gap-2 overflow-hidden rounded-2xl p-3">
+    <div className="glass-panel absolute right-0 bottom-full mb-3 flex max-h-[70vh] w-72 flex-col gap-2 overflow-hidden rounded-2xl p-3">
       <div className="flex items-center justify-between">
         <p className="text-sm font-medium">Participantes ({participants.length})</p>
         <button type="button" onClick={onClose} className="text-muted-foreground hover:text-foreground">

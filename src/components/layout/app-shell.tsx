@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LogOut, Settings, Users } from "lucide-react";
+import { LogOut, Settings, Users, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UserAvatar, userPhotoProps } from "@/components/shared/user-avatar";
 import { logoutAction } from "@/lib/actions/auth";
@@ -24,14 +24,30 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
         <nav className="flex items-center gap-1">
           {isAdmin && (
             <>
-              <Button variant="ghost" size="sm" render={<Link href="/salas" />}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="font-semibold text-violet-400 hover:text-violet-300"
+                render={<Link href="/salas" />}
+              >
+                <Video className="size-4" />
                 Salas
               </Button>
-              <Button variant="ghost" size="sm" render={<Link href="/usuarios" />}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="font-semibold text-orange-400 hover:text-orange-300"
+                render={<Link href="/usuarios" />}
+              >
                 <Users className="size-4" />
                 Usuários
               </Button>
-              <Button variant="ghost" size="sm" render={<Link href="/configuracoes" />}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="font-semibold text-cyan-400 hover:text-cyan-300"
+                render={<Link href="/configuracoes" />}
+              >
                 <Settings className="size-4" />
                 Configurações
               </Button>
