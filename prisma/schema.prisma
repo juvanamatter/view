@@ -72,8 +72,7 @@ model Room {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
-  recordings Recording[]
-  visits     RoomVisit[]
+  visits RoomVisit[]
 }
 
 // Registro de cada vez que um usuário logado entra em uma sala, usado para montar
@@ -87,20 +86,6 @@ model RoomVisit {
   joinedAt DateTime @default(now())
 
   @@index([userId, joinedAt])
-}
-
-// Gravação de uma sala via Egress do LiveKit. O arquivo em si fica num bucket S3
-// privado (fileKey); o download é sempre por URL assinada e temporária, nunca pública.
-model Recording {
-  id          String    @id @default(cuid())
-  roomId      String
-  room        Room      @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  egressId    String    @unique
-  status      String    @default("STARTING") // STARTING | ACTIVE | ENDING | COMPLETE | FAILED
-  fileKey     String?
-  durationSec Int?
-  startedAt   DateTime  @default(now())
-  endedAt     DateTime?
 }
 
 // Biblioteca de sons compartilhada entre todas as salas (estilo soundboard do Discord).

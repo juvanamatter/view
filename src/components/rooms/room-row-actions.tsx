@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { MoreHorizontal, Link as LinkIcon, Pencil, Trash2, Video } from "lucide-react";
+import { MoreHorizontal, Link as LinkIcon, Pencil, Trash2 } from "lucide-react";
 import type { Room } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,14 +23,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { RoomFormSheet, type RoomDefaults } from "./room-form-sheet";
-import { RecordingsDialog } from "./recordings-dialog";
 import { deleteRoomAction } from "@/lib/actions/rooms";
 
 export function RoomRowActions({ room, defaults }: { room: Room; defaults: RoomDefaults }) {
   const router = useRouter();
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [recordingsOpen, setRecordingsOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
   function copyLink() {
@@ -67,10 +65,6 @@ export function RoomRowActions({ room, defaults }: { room: Room; defaults: RoomD
             <Pencil />
             Editar
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setRecordingsOpen(true)}>
-            <Video />
-            Gravações
-          </DropdownMenuItem>
           <DropdownMenuItem variant="destructive" onClick={() => setDeleteOpen(true)}>
             <Trash2 />
             Excluir
@@ -79,7 +73,6 @@ export function RoomRowActions({ room, defaults }: { room: Room; defaults: RoomD
       </DropdownMenu>
 
       <RoomFormSheet open={editOpen} onOpenChange={setEditOpen} room={room} defaults={defaults} />
-      <RecordingsDialog slug={room.slug} open={recordingsOpen} onOpenChange={setRecordingsOpen} />
 
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <AlertDialogContent>

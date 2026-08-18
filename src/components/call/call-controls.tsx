@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
+import { useState } from "react";
 import { Track } from "livekit-client";
 import {
   Mic,
@@ -18,19 +17,25 @@ import {
   Users,
   Wind,
   Hand,
-  Circle,
+  ChevronUp,
 } from "lucide-react";
 import { useTrackToggle, useDisconnectButton, useParticipants } from "@livekit/components-react";
 import { useKrispNoiseFilter } from "@livekit/components-react/krisp";
 import { isKrispNoiseFilterSupported } from "@livekit/krisp-noise-filter";
 import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { SoundboardPanel } from "./soundboard-panel";
 import { BackgroundSelectorPanel } from "./background-selector-panel";
 import { TranscriptionPanel } from "./transcription-panel";
 import { ParticipantsPanel } from "./participants-panel";
 import { useWhiteboard } from "./whiteboard-context";
 import { useHandRaise } from "./hand-raise-context";
-import { useRecording } from "./recording-context";
 
 function ControlButton({
   active,
@@ -65,27 +70,22 @@ export function CallControls({
   allowScreenShare,
   currentUserId,
   roomName,
-  canManageRecording,
   chatOpen,
   onToggleChat,
 }: {
   allowScreenShare: boolean;
   currentUserId: string | null;
   roomName: string;
-  canManageRecording: boolean;
   chatOpen: boolean;
   onToggleChat: () => void;
 }) {
   const whiteboard = useWhiteboard();
-  const recording = useRecording();
-  useEffect(() => {
-    if (recording.error) toast.error(recording.error);
-  }, [recording.error]);
   const { localRaised, toggle: toggleHand } = useHandRaise();
   const mic = useTrackToggle({ source: Track.Source.Microphone });
   const cam = useTrackToggle({ source: Track.Source.Camera });
   const screen = useTrackToggle({
     source: Track.Source.ScreenShare,
+    captureOptions: { audio: true },
     onChange: (enabled, isUserInitiated) => {
       if (enabled && isUserInitiated && currentUserId) {
         fetch("/api/stats/screen-share", { method: "POST" }).catch(() => {});
@@ -142,29 +142,12 @@ export function CallControls({
             activeGradient="bg-gradient-to-br from-emerald-500 to-teal-500"
           />
         )}
-        {noiseFilterSupported && (
-          <ControlButton
-            active={isNoiseFilterEnabled}
-            disabled={isNoiseFilterPending}
-            icon={<Wind className="size-5" />}
-            label={isNoiseFilterEnabled ? "Anti-ruído on" : "Anti-ruído"}
-            activeGradient="bg-gradient-to-br from-teal-500 to-cyan-600"
-            onClick={() => setNoiseFilterEnabled(!isNoiseFilterEnabled)}
-          />
-        )}
         <ControlButton
           active={activePanel === "participants"}
           icon={<Users className="size-5" />}
           label={`Pessoas (${participants.length})`}
           activeGradient="bg-gradient-to-br from-cyan-500 to-teal-600"
           onClick={() => togglePanel("participants")}
-        />
-        <ControlButton
-          active={activePanel === "background"}
-          icon={<ImageIcon className="size-5" />}
-          label="Fundo"
-          activeGradient="bg-gradient-to-br from-amber-500 to-orange-600"
-          onClick={() => togglePanel("background")}
         />
         <ControlButton
           active={activePanel === "sounds"}
@@ -179,13 +162,6 @@ export function CallControls({
           label="Chat"
           activeGradient="bg-gradient-to-br from-sky-500 to-blue-600"
           onClick={onToggleChat}
-        />
-        <ControlButton
-          active={activePanel === "transcript"}
-          icon={<FileText className="size-5" />}
-          label="Transcrição"
-          activeGradient="bg-gradient-to-br from-rose-500 to-pink-600"
-          onClick={() => togglePanel("transcript")}
         />
         {whiteboard.hasScreenShare && (
           <ControlButton
@@ -210,16 +186,39 @@ export function CallControls({
           activeGradient="bg-gradient-to-br from-yellow-400 to-amber-500"
           onClick={toggleHand}
         />
-        {canManageRecording && (
-          <ControlButton
-            active={recording.active}
-            disabled={recording.pending}
-            icon={<Circle className={cn("size-5", recording.active && "fill-current")} />}
-            label={recording.active ? "Parar gravação" : "Gravar"}
-            activeGradient="bg-gradient-to-br from-red-600 to-rose-700"
-            onClick={recording.active ? recording.stop : recording.start}
-          />
-        )}
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            className={cn(
+              "flex flex-col items-center justify-center gap-1 rounded-2xl px-5 py-3 text-xs font-medium text-white shadow-lg transition-transform active:scale-95",
+              isNoiseFilterEnabled || activePanel === "background" || activePanel === "transcript"
+                ? "bg-gradient-to-br from-slate-500 to-slate-700"
+                : "bg-white/10 hover:bg-white/15"
+            )}
+          >
+            <ChevronUp className="size-5" />
+            Mais
+          </DropdownMenuTrigger>
+          <DropdownMenuContent side="top" align="end" sideOffset={12} className="w-56">
+            {noiseFilterSupported && (
+              <DropdownMenuCheckboxItem
+                checked={isNoiseFilterEnabled}
+                onCheckedChange={(checked) => setNoiseFilterEnabled(checked === true)}
+                disabled={isNoiseFilterPending}
+              >
+                <Wind className="size-4" />
+                Anti-ruído
+              </DropdownMenuCheckboxItem>
+            )}
+            <DropdownMenuItem onClick={() => togglePanel("background")}>
+              <ImageIcon className="size-4" />
+              Fundo
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => togglePanel("transcript")}>
+              <FileText className="size-4" />
+              Transcrição
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <button
           type="button"
           {...disconnectProps}

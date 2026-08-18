@@ -16,8 +16,6 @@ import { WhiteboardProvider } from "./whiteboard-context";
 import { WhiteboardRequestPanel } from "./whiteboard-request-panel";
 import { TranscriptionProvider, type TranscriptEntry } from "./transcription-context";
 import { HandRaiseProvider } from "./hand-raise-context";
-import { RecordingProvider } from "./recording-context";
-import { RecordingBanner } from "./recording-banner";
 import { CallEndedScreen } from "./call-ended-screen";
 
 export function CallRoom({
@@ -84,31 +82,27 @@ export function CallRoom({
         <WhiteboardProvider>
           <TranscriptionProvider onEntriesChange={handleEntriesChange}>
             <HandRaiseProvider>
-              <RecordingProvider roomSlug={session.room.slug}>
-                <WaitingGate>
-                  <div className="flex min-h-0 flex-1">
-                    <div className="min-h-0 min-w-0 flex-1 overflow-hidden">
-                      <VideoConference />
-                    </div>
-                    {chatOpen && (
-                      <div className="fixed inset-x-4 top-4 bottom-24 z-40 md:static md:inset-auto md:z-auto md:my-2 md:mr-2 md:w-80 md:shrink-0">
-                        <ChatPanel onClose={() => setChatOpen(false)} />
-                      </div>
-                    )}
+              <WaitingGate>
+                <div className="flex min-h-0 flex-1">
+                  <div className="min-h-0 min-w-0 flex-1 overflow-hidden">
+                    <VideoConference />
                   </div>
-                  <CallControls
-                    allowScreenShare={session.room.allowScreenShare}
-                    currentUserId={currentUserId}
-                    roomName={session.room.name}
-                    canManageRecording={canAdmit}
-                    chatOpen={chatOpen}
-                    onToggleChat={() => setChatOpen((v) => !v)}
-                  />
-                </WaitingGate>
-                <WhiteboardRequestPanel />
-                <RecordingBanner />
-                {canAdmit && session.room.waitingRoom && <HostWaitingPanel slug={session.room.slug} />}
-              </RecordingProvider>
+                  {chatOpen && (
+                    <div className="fixed inset-x-4 top-4 bottom-24 z-40 md:static md:inset-auto md:z-auto md:my-2 md:mr-2 md:w-80 md:shrink-0">
+                      <ChatPanel onClose={() => setChatOpen(false)} />
+                    </div>
+                  )}
+                </div>
+                <CallControls
+                  allowScreenShare={session.room.allowScreenShare}
+                  currentUserId={currentUserId}
+                  roomName={session.room.name}
+                  chatOpen={chatOpen}
+                  onToggleChat={() => setChatOpen((v) => !v)}
+                />
+              </WaitingGate>
+              <WhiteboardRequestPanel />
+              {canAdmit && session.room.waitingRoom && <HostWaitingPanel slug={session.room.slug} />}
             </HandRaiseProvider>
           </TranscriptionProvider>
         </WhiteboardProvider>
