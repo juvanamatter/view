@@ -2,6 +2,7 @@
 
 import "@livekit/components-styles";
 import { LiveKitRoom, RoomAudioRenderer } from "@livekit/components-react";
+import { AudioPresets, VideoPresets } from "livekit-client";
 import type { CallSession } from "@/lib/call-types";
 import { WaitingGate } from "./waiting-gate";
 import { VideoConference } from "./video-conference";
@@ -22,8 +23,20 @@ export function CallRoom({
     <LiveKitRoom
       token={session.token}
       serverUrl={session.livekitUrl}
-      video={session.room.cameraOnEntry}
+      video={session.room.cameraOnEntry ? { resolution: VideoPresets.h720.resolution } : false}
       audio={!session.room.muteOnEntry}
+      options={{
+        adaptiveStream: true,
+        dynacast: true,
+        videoCaptureDefaults: { resolution: VideoPresets.h720.resolution },
+        publishDefaults: {
+          videoEncoding: VideoPresets.h720.encoding,
+          videoSimulcastLayers: [VideoPresets.h180, VideoPresets.h360, VideoPresets.h720],
+          audioPreset: AudioPresets.musicHighQuality,
+          dtx: true,
+          red: true,
+        },
+      }}
       data-lk-theme="reuniao"
       className="app-gradient-bg flex flex-col"
       style={{ height: "100dvh" }}
