@@ -11,6 +11,7 @@ import { CallControls } from "./call-controls";
 import { ChatPanel } from "./chat-panel";
 import { HostWaitingPanel } from "./host-waiting-panel";
 import { UsageTracker } from "./usage-tracker";
+import { SoundboardProvider } from "./soundboard-context";
 
 export function CallRoom({
   session,
@@ -48,26 +49,28 @@ export function CallRoom({
         window.location.href = "/";
       }}
     >
-      <WaitingGate>
-        <div className="flex min-h-0 flex-1">
-          <div className="min-h-0 min-w-0 flex-1 overflow-hidden">
-            <VideoConference />
-          </div>
-          {chatOpen && (
-            <div className="fixed inset-x-4 top-4 bottom-24 z-40 md:static md:inset-auto md:z-auto md:my-2 md:mr-2 md:w-80 md:shrink-0">
-              <ChatPanel />
+      <SoundboardProvider>
+        <WaitingGate>
+          <div className="flex min-h-0 flex-1">
+            <div className="min-h-0 min-w-0 flex-1 overflow-hidden">
+              <VideoConference />
             </div>
-          )}
-        </div>
-        <CallControls
-          allowScreenShare={session.room.allowScreenShare}
-          currentUserId={currentUserId}
-          roomName={session.room.name}
-          chatOpen={chatOpen}
-          onToggleChat={() => setChatOpen((v) => !v)}
-        />
-      </WaitingGate>
-      {canAdmit && session.room.waitingRoom && <HostWaitingPanel slug={session.room.slug} />}
+            {chatOpen && (
+              <div className="fixed inset-x-4 top-4 bottom-24 z-40 md:static md:inset-auto md:z-auto md:my-2 md:mr-2 md:w-80 md:shrink-0">
+                <ChatPanel />
+              </div>
+            )}
+          </div>
+          <CallControls
+            allowScreenShare={session.room.allowScreenShare}
+            currentUserId={currentUserId}
+            roomName={session.room.name}
+            chatOpen={chatOpen}
+            onToggleChat={() => setChatOpen((v) => !v)}
+          />
+        </WaitingGate>
+        {canAdmit && session.room.waitingRoom && <HostWaitingPanel slug={session.room.slug} />}
+      </SoundboardProvider>
       <RoomAudioRenderer />
       <UsageTracker userId={currentUserId} />
     </LiveKitRoom>
