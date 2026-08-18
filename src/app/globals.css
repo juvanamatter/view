@@ -288,3 +288,13 @@
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid color-mix(in oklch, white 10%, transparent);
 }
+
+[data-lk-theme="reuniao"] .lk-participant-tile[data-has-photo="true"] .lk-participant-placeholder {
+  background-image: var(--avatar-url);
+  background-size: cover;
+  background-position: var(--avatar-pos, center);
+}
+
+[data-lk-theme="reuniao"] .lk-participant-tile[data-has-photo="true"] .lk-participant-placeholder svg {
+  display: none;
+}

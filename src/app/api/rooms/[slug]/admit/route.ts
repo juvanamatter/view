@@ -26,11 +26,26 @@ export async function POST(request: Request, context: { params: Promise<{ slug: 
   }
 
   const svc = getRoomServiceClient();
-  await svc.updateParticipant(slug, identity, JSON.stringify({ waiting: false }), {
-    canPublish: true,
-    canSubscribe: true,
-    canPublishData: true,
-  });
+  const participant = await svc.getParticipant(slug, identity).catch(() => null);
+  let existingMetadata: Record<string, unknown> = {};
+  if (participant?.metadata) {
+    try {
+      existingMetadata = JSON.parse(participant.metadata);
+    } catch {
+      // metadata inválida, ignora e segue com objeto vazio
+    }
+  }
+
+  await svc.updateParticipant(
+    slug,
+    identity,
+    JSON.stringify({ ...existingMetadata, waiting: false }),
+    {
+      canPublish: true,
+      canSubscribe: true,
+      canPublishData: true,
+    }
+  );
 
   return NextResponse.json({ success: true });
 }

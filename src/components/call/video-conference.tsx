@@ -5,11 +5,11 @@ import {
   FocusLayout,
   FocusLayoutContainer,
   GridLayout,
-  ParticipantTile,
   useTracks,
 } from "@livekit/components-react";
 import { Track } from "livekit-client";
 import { WhiteboardOverlay } from "./whiteboard-overlay";
+import { ParticipantTileWithAvatar } from "./participant-tile-with-avatar";
 
 export function VideoConference({ whiteboardActive }: { whiteboardActive: boolean }) {
   const tracks = useTracks(
@@ -34,7 +34,7 @@ export function VideoConference({ whiteboardActive }: { whiteboardActive: boolea
     return (
       <FocusLayoutContainer style={{ height: "100%" }}>
         <CarouselLayout tracks={otherTracks}>
-          <ParticipantTile />
+          <ParticipantTileWithAvatar />
         </CarouselLayout>
         <div className="relative size-full">
           <FocusLayout trackRef={screenShareTrack} />
@@ -46,7 +46,7 @@ export function VideoConference({ whiteboardActive }: { whiteboardActive: boolea
 
   return (
     <GridLayout tracks={tracks} style={{ height: "100%" }}>
-      <ParticipantTile />
+      <ParticipantTileWithAvatar />
     </GridLayout>
   );
 }

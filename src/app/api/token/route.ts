@@ -3,6 +3,7 @@ import { TrackSource } from "livekit-server-sdk";
 import { prisma } from "@/lib/prisma";
 import { joinSchema } from "@/lib/validators/join";
 import { mintParticipantToken, countActiveParticipants, getLiveKitUrl } from "@/lib/livekit";
+import { getCurrentUser } from "@/lib/auth";
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
@@ -30,6 +31,7 @@ export async function POST(request: Request) {
 
   const identity = `${participantName.trim().slice(0, 40)}-${Math.random().toString(36).slice(2, 8)}`;
   const waiting = room.waitingRoom;
+  const user = await getCurrentUser();
 
   const canPublishSources = room.allowScreenShare
     ? [TrackSource.CAMERA, TrackSource.MICROPHONE, TrackSource.SCREEN_SHARE, TrackSource.SCREEN_SHARE_AUDIO]
@@ -39,7 +41,16 @@ export async function POST(request: Request) {
     roomName: room.slug,
     identity,
     participantName: participantName.trim(),
-    metadata: JSON.stringify({ waiting }),
+    metadata: JSON.stringify({
+      waiting,
+      ...(user?.photoUrl
+        ? {
+            photoUrl: user.photoUrl,
+            photoPositionX: user.photoPositionX,
+            photoPositionY: user.photoPositionY,
+          }
+        : {}),
+    }),
     grant: {
       canPublish: !waiting,
       canSubscribe: !waiting,
