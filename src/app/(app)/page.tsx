@@ -8,22 +8,10 @@ import { countActiveParticipants } from "@/lib/livekit";
 import { Button } from "@/components/ui/button";
 import { CopyLinkButton } from "@/components/home/copy-link-button";
 import { JoinByCodeForm } from "@/components/home/join-by-code-form";
+import { TimeGreeting } from "@/components/home/time-greeting";
 import { formatLastSeen } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
-
-function getGreeting() {
-  const hour = Number(
-    new Intl.DateTimeFormat("en-US", {
-      hour: "numeric",
-      hour12: false,
-      timeZone: "America/Sao_Paulo",
-    }).format(new Date())
-  );
-  if (hour < 12) return "Bom dia";
-  if (hour < 18) return "Boa tarde";
-  return "Boa noite";
-}
 
 export default async function HomePage() {
   const user = await getCurrentUser();
@@ -43,21 +31,16 @@ export default async function HomePage() {
   );
   const liveBySlug = new Map(liveCounts);
 
-  const liveOwnedCount = rooms.filter((r) => (liveBySlug.get(r.slug) ?? 0) > 0).length;
-  const subtitle =
-    rooms.length === 0
-      ? "Crie sua primeira sala para começar."
-      : liveOwnedCount > 0
-        ? `${liveOwnedCount} das suas salas está${liveOwnedCount === 1 ? "" : "ão"} ao vivo agora.`
-        : `Você tem ${rooms.length} sala${rooms.length === 1 ? "" : "s"} criada${rooms.length === 1 ? "" : "s"}.`;
-
   return (
     <div className="mx-auto max-w-5xl space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold">
-          {getGreeting()}, {user.name.split(" ")[0]} 👋
+        <p className="text-sm text-muted-foreground">Bem-vindo(a) ao {settings.brandName} 👋</p>
+        <h1 className="mt-0.5 text-2xl font-semibold">
+          <TimeGreeting name={user.name.split(" ")[0]} />
         </h1>
-        <p className="mt-0.5 text-sm text-muted-foreground">{subtitle}</p>
+        <p className="mt-0.5 text-sm text-muted-foreground">
+          Câmera, áudio, compartilhamento de tela e diversão. Tudo em um lugar só.
+        </p>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
@@ -69,10 +52,7 @@ export default async function HomePage() {
                 type="submit"
                 className="flex w-full flex-col items-start gap-2 rounded-xl border border-white/10 p-4 text-left transition-colors hover:bg-white/5"
               >
-                <span
-                  className="flex size-9 items-center justify-center rounded-lg"
-                  style={{ background: settings.primaryColor }}
-                >
+                <span className="flex size-9 items-center justify-center rounded-lg bg-gradient-to-br from-fuchsia-500 to-purple-600">
                   <Plus className="size-4 text-white" />
                 </span>
                 <span className="font-medium">Nova reunião</span>
@@ -83,10 +63,7 @@ export default async function HomePage() {
               href="#suas-salas"
               className="flex flex-col items-start gap-2 rounded-xl border border-white/10 p-4 text-left transition-colors hover:bg-white/5"
             >
-              <span
-                className="flex size-9 items-center justify-center rounded-lg"
-                style={{ background: settings.salasColor }}
-              >
+              <span className="flex size-9 items-center justify-center rounded-lg bg-gradient-to-br from-fuchsia-500 to-purple-600">
                 <Video className="size-4 text-white" />
               </span>
               <span className="font-medium">Suas salas</span>
@@ -95,10 +72,13 @@ export default async function HomePage() {
           </div>
         </div>
 
-        <div className="glass-card p-5">
-          <h2 className="text-sm font-medium text-muted-foreground">Entrar com um link</h2>
+        <div className="rounded-2xl border border-fuchsia-400/20 bg-gradient-to-br from-purple-950 to-fuchsia-950/70 p-5">
+          <h2 className="flex items-center gap-1.5 text-sm font-medium">
+            <Video className="size-4" />
+            Entrar com um código
+          </h2>
           <p className="mt-1 text-xs text-muted-foreground">
-            Cole o link ou código de uma sala compartilhada com você.
+            Digite o código da sala compartilhado com você.
           </p>
           <div className="mt-4">
             <JoinByCodeForm />

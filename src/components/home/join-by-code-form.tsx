@@ -36,9 +36,13 @@ export function JoinByCodeForm() {
         value={value}
         onChange={(e) => setValue(e.target.value)}
         placeholder="ex.: matter-abc123 ou o link da sala"
-        className="flex-1"
+        className="flex-1 border-white/10 bg-black/20"
       />
-      <Button type="submit" disabled={!value.trim()}>
+      <Button
+        type="submit"
+        disabled={!value.trim()}
+        className="bg-gradient-to-br from-fuchsia-500 to-purple-600 hover:opacity-90"
+      >
         Entrar
         <ArrowRight className="size-4" />
       </Button>
