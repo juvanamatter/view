@@ -55,13 +55,13 @@ export default async function HomePage() {
             <form action={createInstantRoomAction}>
               <button
                 type="submit"
-                className="flex w-full flex-col items-start gap-2 rounded-xl border border-white/10 p-4 text-left transition-colors hover:bg-white/5"
+                className="flex w-full flex-col items-start gap-2 rounded-xl bg-gradient-to-br from-fuchsia-500 to-purple-600 p-4 text-left shadow-lg shadow-purple-500/30 transition-transform hover:scale-[1.02] active:scale-[0.98]"
               >
-                <span className="flex size-9 items-center justify-center rounded-lg bg-gradient-to-br from-fuchsia-500 to-purple-600">
+                <span className="flex size-9 items-center justify-center rounded-lg bg-white/20">
                   <Plus className="size-4 text-white" />
                 </span>
-                <span className="font-medium">Nova reunião</span>
-                <span className="text-xs text-muted-foreground">Inicie uma sala instantânea</span>
+                <span className="font-semibold text-white">Nova reunião</span>
+                <span className="text-xs text-white/80">Inicie uma sala instantânea</span>
               </button>
             </form>
             <ScheduleMeetingButton />
