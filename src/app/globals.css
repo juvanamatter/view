@@ -237,6 +237,20 @@
   animation: float-soft 2.6s ease-in-out infinite;
 }
 
+@keyframes float-button {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-float-button {
+  animation: float-button 3.4s ease-in-out infinite;
+}
+
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;

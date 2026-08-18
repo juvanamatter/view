@@ -33,6 +33,10 @@ export async function POST(request: Request) {
   const waiting = room.waitingRoom;
   const user = await getCurrentUser();
 
+  if (user) {
+    await prisma.roomVisit.create({ data: { userId: user.id, roomId: room.id } }).catch(() => {});
+  }
+
   const canPublishSources = room.allowScreenShare
     ? [TrackSource.CAMERA, TrackSource.MICROPHONE, TrackSource.SCREEN_SHARE, TrackSource.SCREEN_SHARE_AUDIO]
     : [TrackSource.CAMERA, TrackSource.MICROPHONE];

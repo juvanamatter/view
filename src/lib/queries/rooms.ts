@@ -18,3 +18,22 @@ export function getRoomsByCreator(userId: string) {
     orderBy: { createdAt: "desc" },
   });
 }
+
+export async function getRecentRoomVisits(userId: string, limit = 5) {
+  const visits = await prisma.roomVisit.findMany({
+    where: { userId },
+    orderBy: { joinedAt: "desc" },
+    take: limit * 6,
+    include: { room: true },
+  });
+
+  const seen = new Set<string>();
+  const result: { room: (typeof visits)[number]["room"]; joinedAt: Date }[] = [];
+  for (const visit of visits) {
+    if (seen.has(visit.roomId)) continue;
+    seen.add(visit.roomId);
+    result.push({ room: visit.room, joinedAt: visit.joinedAt });
+    if (result.length >= limit) break;
+  }
+  return result;
+}

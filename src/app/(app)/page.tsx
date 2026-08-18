@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { MonitorUp, Mic, PartyPopper, Plus, Video } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
-import { getRoomsByCreator } from "@/lib/queries/rooms";
+import { getRoomsByCreator, getRecentRoomVisits } from "@/lib/queries/rooms";
 import { getAppSettings } from "@/lib/queries/app-settings";
 import { createInstantRoomAction } from "@/lib/actions/rooms";
 import { Button } from "@/components/ui/button";
 import { CopyLinkButton } from "@/components/home/copy-link-button";
+import { formatLastSeen } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +14,11 @@ export default async function HomePage() {
   const user = await getCurrentUser();
   if (!user) return null;
 
-  const [rooms, settings] = await Promise.all([getRoomsByCreator(user.id), getAppSettings()]);
+  const [rooms, recentVisits, settings] = await Promise.all([
+    getRoomsByCreator(user.id),
+    getRecentRoomVisits(user.id),
+    getAppSettings(),
+  ]);
 
   const features = [
     { icon: Video, label: "Câmera", color: settings.salasColor },
@@ -75,14 +80,44 @@ export default async function HomePage() {
           </div>
 
           <div className="animate-fade-in-up" style={{ animationDelay: "420ms" }}>
-            <form action={createInstantRoomAction}>
-              <Button type="submit" size="lg" className="shadow-lg shadow-primary/20">
-                <Plus className="size-4" />
-                Criar sala agora
-              </Button>
-            </form>
+            <div className="animate-float-button inline-block">
+              <form action={createInstantRoomAction}>
+                <Button type="submit" size="lg" className="shadow-lg shadow-primary/20">
+                  <Plus className="size-4" />
+                  Criar sala agora
+                </Button>
+              </form>
+            </div>
           </div>
         </div>
+      </div>
+
+      <div className="space-y-3">
+        <h2 className="text-sm font-medium text-muted-foreground">Últimas reuniões</h2>
+        {recentVisits.length === 0 ? (
+          <div className="glass-card p-6 text-center text-sm text-muted-foreground">
+            Você ainda não participou de nenhuma reunião.
+          </div>
+        ) : (
+          <div className="glass-card divide-y divide-border">
+            {recentVisits.map(({ room, joinedAt }) => (
+              <div key={room.id} className="flex items-center justify-between gap-3 p-3">
+                <div className="flex items-center gap-2.5 overflow-hidden">
+                  <Video className="size-4 shrink-0 text-primary" />
+                  <div className="flex flex-col overflow-hidden">
+                    <span className="truncate font-medium">{room.name}</span>
+                    <span className="truncate text-xs text-muted-foreground">
+                      {formatLastSeen(joinedAt)}
+                    </span>
+                  </div>
+                </div>
+                <Button size="sm" variant="outline" render={<Link href={`/sala/${room.slug}`} />}>
+                  Entrar
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="space-y-3">

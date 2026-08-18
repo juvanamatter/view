@@ -50,7 +50,8 @@ model User {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
-  rooms Room[]
+  rooms      Room[]
+  roomVisits RoomVisit[]
 }
 
 model Room {
@@ -72,6 +73,20 @@ model Room {
   updatedAt        DateTime @updatedAt
 
   recordings Recording[]
+  visits     RoomVisit[]
+}
+
+// Registro de cada vez que um usuário logado entra em uma sala, usado para montar
+// a lista de "últimas reuniões" na página inicial. Convidados anônimos não geram registro.
+model RoomVisit {
+  id       String   @id @default(cuid())
+  userId   String
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  roomId   String
+  room     Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  joinedAt DateTime @default(now())
+
+  @@index([userId, joinedAt])
 }
 
 // Gravação de uma sala via Egress do LiveKit. O arquivo em si fica num bucket S3
