@@ -1,13 +1,26 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { createLocalAudioTrack, createLocalVideoTrack, LocalAudioTrack, LocalVideoTrack } from "livekit-client";
+import Link from "next/link";
+import {
+  createLocalAudioTrack,
+  createLocalVideoTrack,
+  LocalAudioTrack,
+  LocalVideoTrack,
+} from "livekit-client";
+import { BackgroundProcessor, type BackgroundProcessorWrapper } from "@livekit/track-processors";
 import { useMediaDevices } from "@livekit/components-react";
-import { Mic, MicOff, Video, VideoOff } from "lucide-react";
+import { ArrowLeft, Ban, Droplets, Mic, MicOff, Video, VideoOff } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import {
+  loadBackgroundSelection,
+  saveBackgroundSelection,
+  type BackgroundSelection,
+} from "@/lib/background-selection";
 import type { CallSession } from "@/lib/call-types";
 
 export type JoinChoices = {
@@ -16,6 +29,8 @@ export type JoinChoices = {
   cameraDeviceId?: string;
   micDeviceId?: string;
 };
+
+type BackgroundImage = { id: string; name: string; imageUrl: string };
 
 function useAudioLevel(track: LocalAudioTrack | null) {
   const [level, setLevel] = useState(0);
@@ -58,6 +73,8 @@ function DevicePreview({
   micDeviceId,
   setCameraDeviceId,
   setMicDeviceId,
+  background,
+  setBackground,
   name,
 }: {
   cameraOn: boolean;
@@ -68,14 +85,25 @@ function DevicePreview({
   micDeviceId: string | undefined;
   setCameraDeviceId: (id: string) => void;
   setMicDeviceId: (id: string) => void;
+  background: BackgroundSelection;
+  setBackground: (b: BackgroundSelection) => void;
   name: string;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoTrack, setVideoTrack] = useState<LocalVideoTrack | null>(null);
   const [audioTrack, setAudioTrack] = useState<LocalAudioTrack | null>(null);
+  const [images, setImages] = useState<BackgroundImage[]>([]);
+  const processorRef = useRef<BackgroundProcessorWrapper | null>(null);
   const cameras = useMediaDevices({ kind: "videoinput" });
   const mics = useMediaDevices({ kind: "audioinput" });
   const level = useAudioLevel(micOn ? audioTrack : null);
+
+  useEffect(() => {
+    fetch("/api/backgrounds")
+      .then((r) => r.json())
+      .then((data) => setImages(data.images ?? []))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!cameraOn) return;
@@ -90,15 +118,54 @@ function DevicePreview({
         }
         track = t;
         setVideoTrack(t);
-        if (videoRef.current) t.attach(videoRef.current);
       })
       .catch(() => {});
 
     return () => {
       cancelled = true;
       track?.stop();
+      processorRef.current = null;
     };
   }, [cameraOn, cameraDeviceId]);
+
+  // Attach the preview track to the <video> element whenever either becomes ready —
+  // the element is always mounted, so this never races the track's own load promise.
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!el || !videoTrack) return;
+    videoTrack.attach(el);
+    return () => {
+      videoTrack.detach(el);
+    };
+  }, [videoTrack]);
+
+  useEffect(() => {
+    if (!videoTrack) return;
+    const track: LocalVideoTrack = videoTrack;
+
+    async function apply() {
+      try {
+        if (background.mode === "none") {
+          if (processorRef.current) await track.stopProcessor();
+          return;
+        }
+        const options =
+          background.mode === "blur"
+            ? ({ mode: "background-blur", blurRadius: 15 } as const)
+            : ({ mode: "virtual-background", imagePath: background.url } as const);
+        if (!processorRef.current) {
+          processorRef.current = BackgroundProcessor(options);
+          await track.setProcessor(processorRef.current);
+        } else {
+          await processorRef.current.switchTo(options);
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error("Não foi possível aplicar o fundo neste navegador.");
+      }
+    }
+    apply();
+  }, [videoTrack, background]);
 
   useEffect(() => {
     if (!micOn) return;
@@ -122,12 +189,22 @@ function DevicePreview({
     };
   }, [micOn, micDeviceId]);
 
+  function chooseBackground(next: BackgroundSelection) {
+    setBackground(next);
+    saveBackgroundSelection(next);
+  }
+
   return (
     <div className="space-y-3">
       <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-black">
-        {cameraOn && videoTrack ? (
-          <video ref={videoRef} muted autoPlay playsInline className="size-full object-cover" />
-        ) : (
+        <video
+          ref={videoRef}
+          muted
+          autoPlay
+          playsInline
+          className={cn("size-full object-cover", !(cameraOn && videoTrack) && "hidden")}
+        />
+        {!(cameraOn && videoTrack) && (
           <div className="flex size-full items-center justify-center">
             <p className="text-sm text-white/70">Câmera desligada</p>
           </div>
@@ -192,6 +269,47 @@ function DevicePreview({
           ))}
         </select>
       </div>
+
+      <div className="space-y-1.5">
+        <Label className="text-xs text-muted-foreground">Fundo virtual</Label>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => chooseBackground({ mode: "none" })}
+            className={cn(
+              "flex size-12 flex-col items-center justify-center gap-0.5 rounded-lg bg-white/5 text-[10px] hover:bg-white/10",
+              background.mode === "none" && "ring-2 ring-primary"
+            )}
+          >
+            <Ban className="size-4" />
+            Nenhum
+          </button>
+          <button
+            type="button"
+            onClick={() => chooseBackground({ mode: "blur" })}
+            className={cn(
+              "flex size-12 flex-col items-center justify-center gap-0.5 rounded-lg bg-white/5 text-[10px] hover:bg-white/10",
+              background.mode === "blur" && "ring-2 ring-primary"
+            )}
+          >
+            <Droplets className="size-4" />
+            Desfoque
+          </button>
+          {images.map((image) => (
+            <button
+              key={image.id}
+              type="button"
+              onClick={() => chooseBackground({ mode: "image", url: image.imageUrl })}
+              className={cn(
+                "size-12 shrink-0 rounded-lg bg-cover bg-center",
+                background.mode === "image" && background.url === image.imageUrl && "ring-2 ring-primary"
+              )}
+              style={{ backgroundImage: `url(${image.imageUrl})` }}
+              title={image.name}
+            />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
@@ -221,6 +339,7 @@ export function PreJoinForm({
   const [micOn, setMicOn] = useState(defaultMicOn);
   const [cameraDeviceId, setCameraDeviceId] = useState<string>();
   const [micDeviceId, setMicDeviceId] = useState<string>();
+  const [background, setBackground] = useState<BackgroundSelection>(() => loadBackgroundSelection());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -248,66 +367,75 @@ export function PreJoinForm({
   }
 
   return (
-    <div className="flex flex-1 items-center justify-center p-4">
-      <div className="grid w-full max-w-3xl gap-6 sm:grid-cols-[1fr_260px]">
-        <DevicePreview
-          cameraOn={cameraOn}
-          micOn={micOn}
-          setCameraOn={setCameraOn}
-          setMicOn={setMicOn}
-          cameraDeviceId={cameraDeviceId}
-          micDeviceId={micDeviceId}
-          setCameraDeviceId={setCameraDeviceId}
-          setMicDeviceId={setMicDeviceId}
-          name={name}
-        />
+    <div className="flex flex-1 flex-col p-4 sm:p-8">
+      <Button variant="ghost" size="sm" className="mb-4 w-fit" render={<Link href="/" />}>
+        <ArrowLeft className="size-4" />
+        Voltar
+      </Button>
 
-        <form onSubmit={handleSubmit} className="glass-card flex flex-col gap-4 p-5">
-          <div>
-            <h1 className="font-semibold">{roomName}</h1>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              {waitingRoom
-                ? "O anfitrião vai aprovar sua entrada."
-                : "Confira sua câmera e microfone antes de entrar."}
-            </p>
-          </div>
+      <div className="flex flex-1 items-center justify-center">
+        <div className="grid w-full max-w-5xl gap-6 sm:grid-cols-[1fr_320px]">
+          <DevicePreview
+            cameraOn={cameraOn}
+            micOn={micOn}
+            setCameraOn={setCameraOn}
+            setMicOn={setMicOn}
+            cameraDeviceId={cameraDeviceId}
+            micDeviceId={micDeviceId}
+            setCameraDeviceId={setCameraDeviceId}
+            setMicDeviceId={setMicDeviceId}
+            background={background}
+            setBackground={setBackground}
+            name={name}
+          />
 
-          {!accountName && (
-            <div className="space-y-1.5">
-              <Label htmlFor="name">Seu nome</Label>
-              <Input
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Como você quer aparecer"
-                required
-                autoFocus
-              />
+          <form onSubmit={handleSubmit} className="glass-card flex flex-col gap-4 p-5">
+            <div>
+              <h1 className="font-semibold">{roomName}</h1>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                {waitingRoom
+                  ? "O anfitrião vai aprovar sua entrada."
+                  : "Confira sua câmera e microfone antes de entrar."}
+              </p>
             </div>
-          )}
-          {hasPassword && (
-            <div className="space-y-1.5">
-              <Label htmlFor="password">Senha da sala</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                autoFocus={Boolean(accountName)}
-              />
-            </div>
-          )}
-          {error && <p className="text-sm text-destructive">{error}</p>}
-          <Button
-            type="submit"
-            size="lg"
-            disabled={loading}
-            className="mt-auto bg-gradient-to-br from-violet-600 to-purple-800"
-          >
-            {loading ? "Entrando..." : "Participar agora"}
-          </Button>
-        </form>
+
+            {!accountName && (
+              <div className="space-y-1.5">
+                <Label htmlFor="name">Seu nome</Label>
+                <Input
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Como você quer aparecer"
+                  required
+                  autoFocus
+                />
+              </div>
+            )}
+            {hasPassword && (
+              <div className="space-y-1.5">
+                <Label htmlFor="password">Senha da sala</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  autoFocus={Boolean(accountName)}
+                />
+              </div>
+            )}
+            {error && <p className="text-sm text-destructive">{error}</p>}
+            <Button
+              type="submit"
+              size="lg"
+              disabled={loading}
+              className="mt-auto bg-gradient-to-br from-violet-600 to-purple-800"
+            >
+              {loading ? "Entrando..." : "Participar agora"}
+            </Button>
+          </form>
+        </div>
       </div>
     </div>
   );

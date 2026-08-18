@@ -317,6 +317,11 @@
   border: 1px solid color-mix(in oklch, white 10%, transparent);
 }
 
+[data-lk-theme="reuniao"] .lk-participant-tile:has(.lk-participant-placeholder) {
+  background: linear-gradient(135deg, oklch(0.34 0.12 300), oklch(0.16 0.07 300));
+  border: none;
+}
+
 [data-lk-theme="reuniao"] .lk-participant-tile[data-has-photo="true"] .lk-participant-placeholder svg {
   display: none;
 }
@@ -324,13 +329,13 @@
 [data-lk-theme="reuniao"] .lk-participant-tile[data-has-photo="true"] .lk-participant-placeholder::before {
   content: "";
   display: block;
-  width: min(35%, 6rem);
+  width: min(35%, 7rem);
   aspect-ratio: 1;
   border-radius: 9999px;
   background-image: var(--avatar-url);
   background-size: cover;
   background-position: var(--avatar-pos, center);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
 }
 
 [data-lk-theme="reuniao"] .lk-participant-tile[data-hand-raised="true"]::after {

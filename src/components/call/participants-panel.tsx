@@ -3,13 +3,25 @@
 import { useParticipants } from "@livekit/components-react";
 import { Mic, MicOff, Video, VideoOff, X } from "lucide-react";
 import { useHandRaise } from "./hand-raise-context";
+import { cn } from "@/lib/utils";
 
-export function ParticipantsPanel({ onClose }: { onClose: () => void }) {
+export function ParticipantsPanel({
+  onClose,
+  position = "above",
+}: {
+  onClose: () => void;
+  position?: "above" | "below";
+}) {
   const participants = useParticipants();
   const { raisedIdentities } = useHandRaise();
 
   return (
-    <div className="glass-panel absolute right-0 bottom-full mb-3 flex max-h-[70vh] w-72 flex-col gap-2 overflow-hidden rounded-2xl p-3">
+    <div
+      className={cn(
+        "glass-panel absolute right-0 flex max-h-[70vh] w-72 flex-col gap-2 overflow-hidden rounded-2xl p-3",
+        position === "above" ? "bottom-full mb-3" : "top-full mt-3"
+      )}
+    >
       <div className="flex items-center justify-between">
         <p className="text-sm font-medium">Participantes ({participants.length})</p>
         <button type="button" onClick={onClose} className="text-muted-foreground hover:text-foreground">

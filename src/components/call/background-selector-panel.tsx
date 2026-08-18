@@ -1,35 +1,17 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useLocalParticipant } from "@livekit/components-react";
-import { LocalVideoTrack } from "livekit-client";
-import { BackgroundProcessor, type BackgroundProcessorWrapper } from "@livekit/track-processors";
 import { Ban, Droplets, Plus, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useBackground } from "./background-context";
 
 type BackgroundImage = { id: string; name: string; imageUrl: string };
-type Selection = { mode: "none" } | { mode: "blur" } | { mode: "image"; url: string };
-
-const STORAGE_KEY = "reuniao:background";
-
-function loadSelection(): Selection {
-  if (typeof window === "undefined") return { mode: "none" };
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { mode: "none" };
-    return JSON.parse(raw) as Selection;
-  } catch {
-    return { mode: "none" };
-  }
-}
 
 export function BackgroundSelectorPanel({ onClose }: { onClose: () => void }) {
-  const { cameraTrack } = useLocalParticipant();
+  const { selection, choose } = useBackground();
   const [images, setImages] = useState<BackgroundImage[]>([]);
-  const [selection, setSelection] = useState<Selection>(() => loadSelection());
   const [uploading, setUploading] = useState(false);
-  const processorRef = useRef<BackgroundProcessorWrapper | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -38,41 +20,6 @@ export function BackgroundSelectorPanel({ onClose }: { onClose: () => void }) {
       .then((data) => setImages(data.images ?? []))
       .catch(() => {});
   }, []);
-
-  useEffect(() => {
-    const trackCandidate = cameraTrack?.track;
-    if (!trackCandidate || !(trackCandidate instanceof LocalVideoTrack)) return;
-    const track: LocalVideoTrack = trackCandidate;
-
-    async function apply() {
-      try {
-        if (selection.mode === "none") {
-          if (processorRef.current) await track.stopProcessor();
-          return;
-        }
-        const options =
-          selection.mode === "blur"
-            ? ({ mode: "background-blur", blurRadius: 15 } as const)
-            : ({ mode: "virtual-background", imagePath: selection.url } as const);
-
-        if (!processorRef.current) {
-          processorRef.current = BackgroundProcessor(options);
-          await track.setProcessor(processorRef.current);
-        } else {
-          await processorRef.current.switchTo(options);
-        }
-      } catch (err) {
-        console.error(err);
-        toast.error("Não foi possível aplicar o fundo neste navegador.");
-      }
-    }
-    apply();
-  }, [cameraTrack, selection]);
-
-  function choose(next: Selection) {
-    setSelection(next);
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-  }
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const uploadedFile = e.target.files?.[0];
