@@ -39,3 +39,21 @@ model Room {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 }
+
+// Biblioteca de sons compartilhada entre todas as salas (estilo soundboard do Discord).
+// Arquivos ficam no Vercel Blob; aqui só o metadado + a URL.
+model SoundboardSound {
+  id        String   @id @default(cuid())
+  name      String
+  emoji     String?
+  audioUrl  String
+  createdAt DateTime @default(now())
+}
+
+// Biblioteca de imagens de fundo virtual, compartilhada entre todas as salas.
+model BackgroundImage {
+  id        String   @id @default(cuid())
+  name      String
+  imageUrl  String
+  createdAt DateTime @default(now())
+}
