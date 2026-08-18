@@ -99,7 +99,7 @@ export function CallControls({
 
   return (
     <>
-      <div className="relative mx-auto mb-4 w-fit">
+      <div className="relative z-30 mx-auto mb-4 w-fit">
         {activePanel === "sounds" && <SoundboardPanel onClose={() => setActivePanel(null)} />}
         {activePanel === "background" && (
           <BackgroundSelectorPanel onClose={() => setActivePanel(null)} />

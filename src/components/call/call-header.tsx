@@ -20,7 +20,7 @@ export function CallHeader({ roomName }: { roomName: string }) {
   const formatted = new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit" }).format(time);
 
   return (
-    <div className="relative flex items-center justify-between px-4 py-3 text-sm text-white">
+    <div className="relative z-30 flex items-center justify-between px-4 py-3 text-sm text-white">
       <div className="flex items-center gap-2">
         <span>{formatted}</span>
         <span className="text-white/30">|</span>
