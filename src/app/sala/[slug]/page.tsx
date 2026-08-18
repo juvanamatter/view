@@ -27,6 +27,8 @@ export default async function RoomPage({ params }: { params: Promise<{ slug: str
       roomName={room.name}
       hasPassword={Boolean(room.password)}
       waitingRoom={room.waitingRoom}
+      defaultCameraOn={room.cameraOnEntry}
+      defaultMicOn={!room.muteOnEntry}
       canAdmit={canAdmit}
       currentUser={user ? { id: user.id, name: user.name } : null}
     />

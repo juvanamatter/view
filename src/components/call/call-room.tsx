@@ -22,10 +22,18 @@ export function CallRoom({
   session,
   canAdmit,
   currentUserId,
+  initialCameraOn,
+  initialMicOn,
+  cameraDeviceId,
+  micDeviceId,
 }: {
   session: CallSession;
   canAdmit: boolean;
   currentUserId: string | null;
+  initialCameraOn: boolean;
+  initialMicOn: boolean;
+  cameraDeviceId?: string;
+  micDeviceId?: string;
 }) {
   const [chatOpen, setChatOpen] = useState(false);
   const [ended, setEnded] = useState(false);
@@ -52,11 +60,11 @@ export function CallRoom({
     <LiveKitRoom
       token={session.token}
       serverUrl={session.livekitUrl}
-      video={session.room.cameraOnEntry ? { resolution: VideoPresets.h720.resolution } : false}
+      video={initialCameraOn ? { resolution: VideoPresets.h720.resolution, deviceId: cameraDeviceId } : false}
       audio={
-        session.room.muteOnEntry
-          ? false
-          : { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
+        initialMicOn
+          ? { echoCancellation: true, noiseSuppression: true, autoGainControl: true, deviceId: micDeviceId }
+          : false
       }
       options={{
         adaptiveStream: true,

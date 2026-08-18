@@ -1,28 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { PreJoinForm } from "./pre-join-form";
+import { useState } from "react";
+import { PreJoinForm, type JoinChoices } from "./pre-join-form";
 import { CallRoom } from "./call-room";
 import type { CallSession } from "@/lib/call-types";
 
 type CurrentUser = { id: string; name: string } | null;
-
-async function requestToken(slug: string, participantName: string, password: string) {
-  const res = await fetch("/api/token", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ slug, participantName, password }),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error ?? "Não foi possível entrar na sala.");
-  return data as CallSession;
-}
 
 export function JoinRoomClient({
   slug,
   roomName,
   hasPassword,
   waitingRoom,
+  defaultCameraOn,
+  defaultMicOn,
   canAdmit,
   currentUser,
 }: {
@@ -30,33 +21,24 @@ export function JoinRoomClient({
   roomName: string;
   hasPassword: boolean;
   waitingRoom: boolean;
+  defaultCameraOn: boolean;
+  defaultMicOn: boolean;
   canAdmit: boolean;
   currentUser: CurrentUser;
 }) {
-  const [session, setSession] = useState<CallSession | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const autoJoin = Boolean(currentUser) && !hasPassword;
+  const [joined, setJoined] = useState<{ session: CallSession; choices: JoinChoices } | null>(null);
 
-  useEffect(() => {
-    if (!autoJoin || session || !currentUser) return;
-    requestToken(slug, currentUser.name, "")
-      .then(setSession)
-      .catch((err: unknown) => {
-        setError(err instanceof Error ? err.message : "Não foi possível entrar na sala.");
-      });
-  }, [autoJoin, session, slug, currentUser]);
-
-  if (session) {
-    return <CallRoom session={session} canAdmit={canAdmit} currentUserId={currentUser?.id ?? null} />;
-  }
-
-  if (autoJoin) {
+  if (joined) {
     return (
-      <div className="flex flex-1 items-center justify-center p-4">
-        <p className={error ? "text-sm text-destructive" : "text-sm text-muted-foreground"}>
-          {error ?? "Entrando na reunião..."}
-        </p>
-      </div>
+      <CallRoom
+        session={joined.session}
+        canAdmit={canAdmit}
+        currentUserId={currentUser?.id ?? null}
+        initialCameraOn={joined.choices.cameraOn}
+        initialMicOn={joined.choices.micOn}
+        cameraDeviceId={joined.choices.cameraDeviceId}
+        micDeviceId={joined.choices.micDeviceId}
+      />
     );
   }
 
@@ -66,8 +48,10 @@ export function JoinRoomClient({
       roomName={roomName}
       hasPassword={hasPassword}
       waitingRoom={waitingRoom}
+      defaultCameraOn={defaultCameraOn}
+      defaultMicOn={defaultMicOn}
       accountName={currentUser?.name ?? null}
-      onJoined={setSession}
+      onJoined={(session, choices) => setJoined({ session, choices })}
     />
   );
 }
