@@ -12,11 +12,13 @@ import {
   Volume2,
   Image as ImageIcon,
   MessageCircle,
+  FileText,
 } from "lucide-react";
 import { useTrackToggle, useDisconnectButton } from "@livekit/components-react";
 import { cn } from "@/lib/utils";
 import { SoundboardPanel } from "./soundboard-panel";
 import { BackgroundSelectorPanel } from "./background-selector-panel";
+import { TranscriptionPanel } from "./transcription-panel";
 
 function ControlButton({
   active,
@@ -50,11 +52,13 @@ function ControlButton({
 export function CallControls({
   allowScreenShare,
   currentUserId,
+  roomName,
   chatOpen,
   onToggleChat,
 }: {
   allowScreenShare: boolean;
   currentUserId: string | null;
+  roomName: string;
   chatOpen: boolean;
   onToggleChat: () => void;
 }) {
@@ -69,9 +73,11 @@ export function CallControls({
     },
   });
   const { buttonProps: disconnectProps } = useDisconnectButton({});
-  const [activePanel, setActivePanel] = useState<"sounds" | "background" | null>(null);
+  const [activePanel, setActivePanel] = useState<"sounds" | "background" | "transcript" | null>(
+    null
+  );
 
-  function togglePanel(panel: "sounds" | "background") {
+  function togglePanel(panel: "sounds" | "background" | "transcript") {
     setActivePanel((current) => (current === panel ? null : panel));
   }
 
@@ -80,6 +86,9 @@ export function CallControls({
       {activePanel === "sounds" && <SoundboardPanel onClose={() => setActivePanel(null)} />}
       {activePanel === "background" && (
         <BackgroundSelectorPanel onClose={() => setActivePanel(null)} />
+      )}
+      {activePanel === "transcript" && (
+        <TranscriptionPanel roomName={roomName} onClose={() => setActivePanel(null)} />
       )}
 
       <div className="glass-panel flex items-center gap-2 rounded-3xl p-2">
@@ -126,6 +135,13 @@ export function CallControls({
           label="Chat"
           activeGradient="bg-gradient-to-br from-sky-500 to-blue-600"
           onClick={onToggleChat}
+        />
+        <ControlButton
+          active={activePanel === "transcript"}
+          icon={<FileText className="size-5" />}
+          label="Transcrição"
+          activeGradient="bg-gradient-to-br from-rose-500 to-pink-600"
+          onClick={() => togglePanel("transcript")}
         />
         <button
           type="button"

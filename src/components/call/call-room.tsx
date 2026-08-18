@@ -62,6 +62,7 @@ export function CallRoom({
         <CallControls
           allowScreenShare={session.room.allowScreenShare}
           currentUserId={currentUserId}
+          roomName={session.room.name}
           chatOpen={chatOpen}
           onToggleChat={() => setChatOpen((v) => !v)}
         />
