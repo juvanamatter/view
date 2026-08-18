@@ -18,6 +18,7 @@ export const roomSchema = z.object({
   allowScreenShare: z.boolean(),
   waitingRoom: z.boolean(),
   isActive: z.boolean(),
+  isTeamRoom: z.boolean(),
 });
 
 export type RoomInput = z.infer<typeof roomSchema>;

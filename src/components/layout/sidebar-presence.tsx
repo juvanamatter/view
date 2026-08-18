@@ -17,9 +17,9 @@ type RosterUser = {
   online: boolean;
 };
 
-export function OnlineBar() {
+export function SidebarPresence() {
   const [users, setUsers] = useState<RosterUser[]>([]);
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
 
   useEffect(() => {
     function fetchRoster() {
@@ -38,39 +38,38 @@ export function OnlineBar() {
   const onlineCount = users.filter((u) => u.online).length;
 
   return (
-    <div className="glass-panel fixed right-4 bottom-4 z-40 w-72 overflow-hidden rounded-2xl">
+    <div className="mt-6 border-t border-white/10 pt-3">
       <button
         type="button"
         onClick={() => setCollapsed((v) => !v)}
-        className="flex w-full items-center justify-between px-3 py-2.5 text-sm font-medium"
+        className="flex w-full items-center justify-between px-1 py-1 text-xs font-medium text-muted-foreground"
       >
         <span className="flex items-center gap-1.5">
           <span className="size-2 rounded-full bg-emerald-400" />
           {onlineCount} online · {users.length} cadastrados
         </span>
-        {collapsed ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+        {collapsed ? <ChevronDown className="size-3.5" /> : <ChevronUp className="size-3.5" />}
       </button>
       {!collapsed && (
-        <div className="max-h-[70vh] space-y-1 overflow-y-auto border-t border-border p-2">
+        <div className="mt-1 max-h-[45vh] space-y-1 overflow-y-auto">
           {users.map((user) => (
             <div
               key={user.id}
               className="flex items-center gap-2 rounded-lg px-1.5 py-1.5 hover:bg-white/5"
             >
               <div className="relative shrink-0">
-                <UserAvatar name={user.name} {...userPhotoProps(user)} className="size-7" />
+                <UserAvatar name={user.name} {...userPhotoProps(user)} className="size-6" />
                 <span
                   className={
-                    "absolute -right-0.5 -bottom-0.5 size-2.5 rounded-full border-2 border-background " +
+                    "absolute -right-0.5 -bottom-0.5 size-2 rounded-full border-2 border-background " +
                     (user.online ? "bg-emerald-400" : "bg-muted-foreground/40")
                   }
                 />
               </div>
               <div className="flex flex-col overflow-hidden">
-                <span className="truncate text-sm">{user.name}</span>
-                <span className="truncate text-xs text-muted-foreground">
+                <span className="truncate text-xs font-medium">{user.name}</span>
+                <span className="truncate text-[10px] text-muted-foreground">
                   {user.online ? "Online agora" : formatLastSeen(user.lastSeenAt)}
-                  {user.jobTitle ? ` · ${user.jobTitle}` : ""}
                 </span>
               </div>
             </div>

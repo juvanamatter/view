@@ -5,10 +5,11 @@ import { UserAvatar, userPhotoProps } from "@/components/shared/user-avatar";
 import { logoutAction } from "@/lib/actions/auth";
 import { getCurrentUser } from "@/lib/auth";
 import { PresenceHeartbeat } from "@/components/presence/presence-heartbeat";
-import { OnlineBar } from "@/components/presence/online-bar";
 import { getAppSettings } from "@/lib/queries/app-settings";
 import { SidebarNav } from "./sidebar-nav";
+import { SidebarPresence } from "./sidebar-presence";
 import { SearchBar } from "./search-bar";
+import { NotificationBell } from "./notification-bell";
 
 export async function AppShell({ children }: { children: React.ReactNode }) {
   const [user, settings] = await Promise.all([getCurrentUser(), getAppSettings()]);
@@ -24,6 +25,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
         <div className="mt-8">
           <SidebarNav isAdmin={isAdmin} colors={settings} />
         </div>
+        {user && <SidebarPresence />}
       </aside>
 
       <div className="flex flex-1 flex-col">
@@ -31,6 +33,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
           {user ? <SearchBar /> : <div />}
           {user && (
             <div className="flex items-center gap-2">
+              <NotificationBell />
               <UserAvatar name={user.name} {...userPhotoProps(user)} className="size-7" />
               <span className="hidden text-sm sm:inline">{user.name}</span>
               <form action={logoutAction}>
@@ -44,12 +47,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
         <main className="flex-1 p-6">{children}</main>
       </div>
 
-      {user && (
-        <>
-          <PresenceHeartbeat />
-          <OnlineBar />
-        </>
-      )}
+      {user && <PresenceHeartbeat />}
     </div>
   );
 }

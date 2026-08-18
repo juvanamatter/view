@@ -39,6 +39,7 @@ function buildInitialForm(room: Room | undefined, defaults: RoomDefaults): RoomI
     allowScreenShare: room?.allowScreenShare ?? defaults.allowScreenShare,
     waitingRoom: room?.waitingRoom ?? defaults.waitingRoom,
     isActive: room?.isActive ?? true,
+    isTeamRoom: room?.isTeamRoom ?? false,
   };
 }
 
@@ -164,6 +165,16 @@ function RoomForm({
           </p>
         </div>
         <Switch checked={form.waitingRoom} onCheckedChange={(v) => update("waitingRoom", v)} />
+      </div>
+
+      <div className="flex items-center justify-between rounded-lg border border-border p-3">
+        <div>
+          <p className="text-sm font-medium">Sala de equipe</p>
+          <p className="text-xs text-muted-foreground">
+            Fica sempre visível em &quot;Equipes&quot; para todo mundo entrar.
+          </p>
+        </div>
+        <Switch checked={form.isTeamRoom} onCheckedChange={(v) => update("isTeamRoom", v)} />
       </div>
 
       <div className="flex items-center justify-between rounded-lg border border-border p-3">

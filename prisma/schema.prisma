@@ -67,6 +67,7 @@ model Room {
   waitingRoom      Boolean  @default(false)
   isActive         Boolean  @default(true)
   isInstant        Boolean  @default(false)
+  isTeamRoom       Boolean  @default(false)
   scheduledAt      DateTime?
   createdByUserId  String?
   createdBy        User?    @relation(fields: [createdByUserId], references: [id], onDelete: SetNull)

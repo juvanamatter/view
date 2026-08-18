@@ -19,6 +19,13 @@ export function getRoomsByCreator(userId: string) {
   });
 }
 
+export function getTeamRooms() {
+  return prisma.room.findMany({
+    where: { isTeamRoom: true, isActive: true },
+    orderBy: { name: "asc" },
+  });
+}
+
 export function getUpcomingScheduledRooms(userId: string, limit = 5) {
   return prisma.room.findMany({
     where: { createdByUserId: userId, scheduledAt: { gte: new Date() } },

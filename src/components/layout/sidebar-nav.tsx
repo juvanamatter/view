@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Settings, Users, Video } from "lucide-react";
+import { Home, Settings, Users, UsersRound, Video } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type NavItem = { href: string; label: string; icon: typeof Home; color: string };
@@ -18,6 +18,7 @@ export function SidebarNav({
 
   const items: NavItem[] = [
     { href: "/", label: "Início", icon: Home, color: colors.primaryColor },
+    { href: "/equipes", label: "Equipes", icon: UsersRound, color: colors.primaryColor },
     ...(isAdmin
       ? [
           { href: "/salas", label: "Salas", icon: Video, color: colors.salasColor },
