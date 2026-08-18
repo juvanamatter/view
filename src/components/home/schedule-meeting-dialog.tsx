@@ -101,7 +101,7 @@ export function ScheduleMeetingButton() {
         onClick={() => setOpen(true)}
         className="flex w-full flex-col items-start gap-2 rounded-xl border border-white/10 p-4 text-left transition-colors hover:bg-white/5"
       >
-        <span className="flex size-9 items-center justify-center rounded-lg bg-gradient-to-br from-fuchsia-500 to-purple-600">
+        <span className="flex size-9 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-purple-800">
           <CalendarPlus className="size-4 text-white" />
         </span>
         <span className="font-medium">Agendar</span>

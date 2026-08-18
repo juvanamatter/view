@@ -55,7 +55,7 @@ export default async function HomePage() {
             <form action={createInstantRoomAction}>
               <button
                 type="submit"
-                className="flex w-full flex-col items-start gap-2 rounded-xl bg-gradient-to-br from-fuchsia-500 to-purple-600 p-4 text-left shadow-lg shadow-purple-500/30 transition-transform hover:scale-[1.02] active:scale-[0.98]"
+                className="flex w-full flex-col items-start gap-2 rounded-xl bg-gradient-to-br from-violet-600 to-purple-800 p-4 text-left shadow-md shadow-black/20 transition-transform hover:scale-[1.02] active:scale-[0.98]"
               >
                 <span className="flex size-9 items-center justify-center rounded-lg bg-white/20">
                   <Plus className="size-4 text-white" />
