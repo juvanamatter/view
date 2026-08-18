@@ -18,6 +18,9 @@ model AppSettings {
   brandName               String   @default("Reunião")
   logoUrl                 String?
   primaryColor            String   @default("#8b5cf6")
+  salasColor              String   @default("#a78bfa")
+  usuariosColor           String   @default("#fb923c")
+  configuracoesColor      String   @default("#22d3ee")
   defaultMaxParticipants  Int      @default(12)
   defaultMuteOnEntry      Boolean  @default(false)
   defaultCameraOnEntry    Boolean  @default(true)

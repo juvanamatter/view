@@ -10,11 +10,45 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { updateBrandSettingsAction } from "@/lib/actions/app-settings";
 import type { BrandSettingsInput } from "@/lib/validators/app-settings";
 
+function ColorField({
+  id,
+  label,
+  hint,
+  value,
+  onChange,
+}: {
+  id: string;
+  label: string;
+  hint?: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <Label htmlFor={id}>{label}</Label>
+      <div className="flex items-center gap-2">
+        <input
+          id={id}
+          type="color"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="h-8 w-14 cursor-pointer rounded-lg border border-input bg-transparent"
+        />
+        <Input value={value} onChange={(e) => onChange(e.target.value)} className="w-28 font-mono" maxLength={7} />
+        {hint && <span className="text-xs text-muted-foreground">{hint}</span>}
+      </div>
+    </div>
+  );
+}
+
 export function BrandSettingsForm({ settings }: { settings: AppSettings }) {
   const [form, setForm] = useState<BrandSettingsInput>({
     brandName: settings.brandName,
     logoUrl: settings.logoUrl,
     primaryColor: settings.primaryColor,
+    salasColor: settings.salasColor,
+    usuariosColor: settings.usuariosColor,
+    configuracoesColor: settings.configuracoesColor,
   });
   const [pending, setPending] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -60,7 +94,7 @@ export function BrandSettingsForm({ settings }: { settings: AppSettings }) {
       <CardHeader>
         <CardTitle>Marca e visual</CardTitle>
         <CardDescription>
-          Nome, logo e cor principal usados em todo o produto (header, tela de login, botões).
+          Nome, logo e cores usados em todo o produto (header, tela de login, botões).
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -108,26 +142,34 @@ export function BrandSettingsForm({ settings }: { settings: AppSettings }) {
             />
           </div>
 
-          <div className="space-y-1.5">
-            <Label htmlFor="primaryColor">Cor principal</Label>
-            <div className="flex items-center gap-2">
-              <input
-                id="primaryColor"
-                type="color"
-                value={form.primaryColor}
-                onChange={(e) => update("primaryColor", e.target.value)}
-                className="h-8 w-14 cursor-pointer rounded-lg border border-input bg-transparent"
-              />
-              <Input
-                value={form.primaryColor}
-                onChange={(e) => update("primaryColor", e.target.value)}
-                className="w-28 font-mono"
-                maxLength={7}
-              />
-              <span className="text-xs text-muted-foreground">
-                Botões, links e destaques em todo o produto.
-              </span>
-            </div>
+          <ColorField
+            id="primaryColor"
+            label="Cor principal"
+            hint="Botões, links e destaques em todo o produto."
+            value={form.primaryColor}
+            onChange={(v) => update("primaryColor", v)}
+          />
+
+          <div className="space-y-3 rounded-lg border border-border p-3">
+            <p className="text-sm font-medium">Cores do menu</p>
+            <ColorField
+              id="salasColor"
+              label="Salas"
+              value={form.salasColor}
+              onChange={(v) => update("salasColor", v)}
+            />
+            <ColorField
+              id="usuariosColor"
+              label="Usuários"
+              value={form.usuariosColor}
+              onChange={(v) => update("usuariosColor", v)}
+            />
+            <ColorField
+              id="configuracoesColor"
+              label="Configurações"
+              value={form.configuracoesColor}
+              onChange={(v) => update("configuracoesColor", v)}
+            />
           </div>
 
           {error && <p className="text-sm text-destructive">{error}</p>}

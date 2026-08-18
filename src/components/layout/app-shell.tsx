@@ -27,7 +27,8 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
               <Button
                 variant="ghost"
                 size="sm"
-                className="font-semibold text-violet-400 hover:text-violet-300"
+                className="font-semibold transition-opacity hover:opacity-80"
+                style={{ color: settings.salasColor }}
                 render={<Link href="/salas" />}
               >
                 <Video className="size-4" />
@@ -36,7 +37,8 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
               <Button
                 variant="ghost"
                 size="sm"
-                className="font-semibold text-orange-400 hover:text-orange-300"
+                className="font-semibold transition-opacity hover:opacity-80"
+                style={{ color: settings.usuariosColor }}
                 render={<Link href="/usuarios" />}
               >
                 <Users className="size-4" />
@@ -45,7 +47,8 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
               <Button
                 variant="ghost"
                 size="sm"
-                className="font-semibold text-cyan-400 hover:text-cyan-300"
+                className="font-semibold transition-opacity hover:opacity-80"
+                style={{ color: settings.configuracoesColor }}
                 render={<Link href="/configuracoes" />}
               >
                 <Settings className="size-4" />

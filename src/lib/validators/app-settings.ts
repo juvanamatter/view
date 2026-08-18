@@ -10,6 +10,8 @@ export const appSettingsSchema = z.object({
 
 export type AppSettingsInput = z.infer<typeof appSettingsSchema>;
 
+const hexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/, "Cor inválida.");
+
 export const brandSettingsSchema = z.object({
   brandName: z.string().min(1, "Informe um nome."),
   logoUrl: z
@@ -17,7 +19,10 @@ export const brandSettingsSchema = z.object({
     .nullable()
     .optional()
     .transform((v) => (v ? v : null)),
-  primaryColor: z.string().regex(/^#[0-9a-fA-F]{6}$/, "Cor inválida."),
+  primaryColor: hexColor,
+  salasColor: hexColor,
+  usuariosColor: hexColor,
+  configuracoesColor: hexColor,
 });
 
 export type BrandSettingsInput = z.infer<typeof brandSettingsSchema>;
