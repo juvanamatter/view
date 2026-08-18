@@ -7,8 +7,8 @@ import { useWhiteboard } from "./whiteboard-context";
 
 const COLORS = ["#ef4444", "#f59e0b", "#22c55e", "#3b82f6", "#ffffff"];
 
-export function WhiteboardOverlay({ active }: { active: boolean }) {
-  const { segments, addSegment, clear } = useWhiteboard();
+export function WhiteboardOverlay() {
+  const { segments, addSegment, clear, active } = useWhiteboard();
   const [color, setColor] = useState(COLORS[0]);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);

@@ -1,6 +1,7 @@
 "use client";
 
 import { ParticipantTile, useEnsureTrackRef, type ParticipantTileProps } from "@livekit/components-react";
+import { useHandRaise } from "./hand-raise-context";
 
 function parsePhotoMeta(metadata?: string) {
   if (!metadata) return null;
@@ -24,12 +25,15 @@ function parsePhotoMeta(metadata?: string) {
 export function ParticipantTileWithAvatar(props: ParticipantTileProps) {
   const trackRef = useEnsureTrackRef(props.trackRef);
   const photo = parsePhotoMeta(trackRef.participant.metadata);
+  const { raisedIdentities } = useHandRaise();
+  const handRaised = raisedIdentities.has(trackRef.participant.identity);
 
   return (
     <ParticipantTile
       {...props}
       trackRef={trackRef}
       data-has-photo={photo ? "true" : undefined}
+      data-hand-raised={handRaised ? "true" : undefined}
       style={
         photo
           ? ({

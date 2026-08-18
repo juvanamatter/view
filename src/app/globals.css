@@ -298,3 +298,13 @@
 [data-lk-theme="reuniao"] .lk-participant-tile[data-has-photo="true"] .lk-participant-placeholder svg {
   display: none;
 }
+
+[data-lk-theme="reuniao"] .lk-participant-tile[data-hand-raised="true"]::after {
+  content: "✋";
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  font-size: 1.25rem;
+  z-index: 10;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
+}

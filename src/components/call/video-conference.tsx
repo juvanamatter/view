@@ -11,7 +11,7 @@ import { Track } from "livekit-client";
 import { WhiteboardOverlay } from "./whiteboard-overlay";
 import { ParticipantTileWithAvatar } from "./participant-tile-with-avatar";
 
-export function VideoConference({ whiteboardActive }: { whiteboardActive: boolean }) {
+export function VideoConference() {
   const tracks = useTracks(
     [
       { source: Track.Source.Camera, withPlaceholder: true },
@@ -38,7 +38,7 @@ export function VideoConference({ whiteboardActive }: { whiteboardActive: boolea
         </CarouselLayout>
         <div className="relative size-full">
           <FocusLayout trackRef={screenShareTrack} />
-          <WhiteboardOverlay active={whiteboardActive} />
+          <WhiteboardOverlay />
         </div>
       </FocusLayoutContainer>
     );

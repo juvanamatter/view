@@ -16,13 +16,9 @@ import {
   PenLine,
   Users,
   Wind,
+  Hand,
 } from "lucide-react";
-import {
-  useTrackToggle,
-  useDisconnectButton,
-  useTracks,
-  useParticipants,
-} from "@livekit/components-react";
+import { useTrackToggle, useDisconnectButton, useParticipants } from "@livekit/components-react";
 import { useKrispNoiseFilter } from "@livekit/components-react/krisp";
 import { isKrispNoiseFilterSupported } from "@livekit/krisp-noise-filter";
 import { cn } from "@/lib/utils";
@@ -30,6 +26,8 @@ import { SoundboardPanel } from "./soundboard-panel";
 import { BackgroundSelectorPanel } from "./background-selector-panel";
 import { TranscriptionPanel } from "./transcription-panel";
 import { ParticipantsPanel } from "./participants-panel";
+import { useWhiteboard } from "./whiteboard-context";
+import { useHandRaise } from "./hand-raise-context";
 
 function ControlButton({
   active,
@@ -66,20 +64,15 @@ export function CallControls({
   roomName,
   chatOpen,
   onToggleChat,
-  whiteboardActive,
-  onToggleWhiteboard,
 }: {
   allowScreenShare: boolean;
   currentUserId: string | null;
   roomName: string;
   chatOpen: boolean;
   onToggleChat: () => void;
-  whiteboardActive: boolean;
-  onToggleWhiteboard: () => void;
 }) {
-  const screenShareTracks = useTracks([{ source: Track.Source.ScreenShare, withPlaceholder: false }], {
-    onlySubscribed: false,
-  });
+  const whiteboard = useWhiteboard();
+  const { localRaised, toggle: toggleHand } = useHandRaise();
   const mic = useTrackToggle({ source: Track.Source.Microphone });
   const cam = useTrackToggle({ source: Track.Source.Camera });
   const screen = useTrackToggle({
@@ -185,15 +178,29 @@ export function CallControls({
           activeGradient="bg-gradient-to-br from-rose-500 to-pink-600"
           onClick={() => togglePanel("transcript")}
         />
-        {screenShareTracks.length > 0 && (
+        {whiteboard.hasScreenShare && (
           <ControlButton
-            active={whiteboardActive}
+            active={whiteboard.active}
+            disabled={whiteboard.requestPending}
             icon={<PenLine className="size-5" />}
-            label="Lousa"
+            label={
+              whiteboard.requestPending
+                ? "Aguardando..."
+                : whiteboard.isPresenter || whiteboard.hasPermission
+                  ? "Lousa"
+                  : "Pedir lousa"
+            }
             activeGradient="bg-gradient-to-br from-lime-500 to-green-600"
-            onClick={onToggleWhiteboard}
+            onClick={whiteboard.toggleActive}
           />
         )}
+        <ControlButton
+          active={localRaised}
+          icon={<Hand className="size-5" />}
+          label={localRaised ? "Mão levantada" : "Levantar a mão"}
+          activeGradient="bg-gradient-to-br from-yellow-400 to-amber-500"
+          onClick={toggleHand}
+        />
         <button
           type="button"
           {...disconnectProps}
