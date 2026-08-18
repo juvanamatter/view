@@ -34,7 +34,7 @@ export function JoinRoomClient({
       roomName={roomName}
       hasPassword={hasPassword}
       waitingRoom={waitingRoom}
-      initialName={currentUser?.name ?? ""}
+      accountName={currentUser?.name ?? null}
       onJoined={setSession}
     />
   );

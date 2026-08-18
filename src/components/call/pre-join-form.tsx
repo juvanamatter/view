@@ -18,17 +18,17 @@ export function PreJoinForm({
   roomName,
   hasPassword,
   waitingRoom,
-  initialName,
+  accountName,
   onJoined,
 }: {
   slug: string;
   roomName: string;
   hasPassword: boolean;
   waitingRoom: boolean;
-  initialName: string;
+  accountName: string | null;
   onJoined: (session: CallSession) => void;
 }) {
-  const [name, setName] = useState(initialName);
+  const [name, setName] = useState(accountName ?? "");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -64,22 +64,26 @@ export function PreJoinForm({
           <CardDescription>
             {waitingRoom
               ? "Esta sala tem aprovação do anfitrião. Você aguardará até ser admitido."
-              : "Informe seu nome para entrar na reunião."}
+              : accountName
+                ? `Entrando como ${accountName}.`
+                : "Informe seu nome para entrar na reunião."}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="name">Seu nome</Label>
-              <Input
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Como você quer aparecer na chamada"
-                required
-                autoFocus
-              />
-            </div>
+            {!accountName && (
+              <div className="space-y-1.5">
+                <Label htmlFor="name">Seu nome</Label>
+                <Input
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Como você quer aparecer na chamada"
+                  required
+                  autoFocus
+                />
+              </div>
+            )}
             {hasPassword && (
               <div className="space-y-1.5">
                 <Label htmlFor="password">Senha da sala</Label>
@@ -89,6 +93,7 @@ export function PreJoinForm({
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  autoFocus={Boolean(accountName)}
                 />
               </div>
             )}
