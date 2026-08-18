@@ -2,7 +2,17 @@
 
 import { useState } from "react";
 import { Track } from "livekit-client";
-import { Mic, MicOff, Video, VideoOff, ScreenShare, PhoneOff, Volume2, Image as ImageIcon } from "lucide-react";
+import {
+  Mic,
+  MicOff,
+  Video,
+  VideoOff,
+  ScreenShare,
+  PhoneOff,
+  Volume2,
+  Image as ImageIcon,
+  MessageCircle,
+} from "lucide-react";
 import { useTrackToggle, useDisconnectButton } from "@livekit/components-react";
 import { cn } from "@/lib/utils";
 import { SoundboardPanel } from "./soundboard-panel";
@@ -40,9 +50,13 @@ function ControlButton({
 export function CallControls({
   allowScreenShare,
   currentUserId,
+  chatOpen,
+  onToggleChat,
 }: {
   allowScreenShare: boolean;
   currentUserId: string | null;
+  chatOpen: boolean;
+  onToggleChat: () => void;
 }) {
   const mic = useTrackToggle({ source: Track.Source.Microphone });
   const cam = useTrackToggle({ source: Track.Source.Camera });
@@ -105,6 +119,13 @@ export function CallControls({
           label="Sons"
           activeGradient="bg-gradient-to-br from-indigo-500 to-violet-600"
           onClick={() => togglePanel("sounds")}
+        />
+        <ControlButton
+          active={chatOpen}
+          icon={<MessageCircle className="size-5" />}
+          label="Chat"
+          activeGradient="bg-gradient-to-br from-sky-500 to-blue-600"
+          onClick={onToggleChat}
         />
         <button
           type="button"

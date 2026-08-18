@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import "@livekit/components-styles";
 import { LiveKitRoom, RoomAudioRenderer } from "@livekit/components-react";
 import { AudioPresets, VideoPresets } from "livekit-client";
@@ -7,6 +8,7 @@ import type { CallSession } from "@/lib/call-types";
 import { WaitingGate } from "./waiting-gate";
 import { VideoConference } from "./video-conference";
 import { CallControls } from "./call-controls";
+import { ChatPanel } from "./chat-panel";
 import { HostWaitingPanel } from "./host-waiting-panel";
 import { UsageTracker } from "./usage-tracker";
 
@@ -19,6 +21,8 @@ export function CallRoom({
   canAdmit: boolean;
   currentUserId: string | null;
 }) {
+  const [chatOpen, setChatOpen] = useState(true);
+
   return (
     <LiveKitRoom
       token={session.token}
@@ -45,10 +49,22 @@ export function CallRoom({
       }}
     >
       <WaitingGate>
-        <div className="min-h-0 flex-1 overflow-hidden">
-          <VideoConference />
+        <div className="flex min-h-0 flex-1">
+          <div className="min-h-0 min-w-0 flex-1 overflow-hidden">
+            <VideoConference />
+          </div>
+          {chatOpen && (
+            <div className="fixed inset-x-4 top-4 bottom-24 z-40 md:static md:inset-auto md:z-auto md:my-2 md:mr-2 md:w-80 md:shrink-0">
+              <ChatPanel />
+            </div>
+          )}
         </div>
-        <CallControls allowScreenShare={session.room.allowScreenShare} currentUserId={currentUserId} />
+        <CallControls
+          allowScreenShare={session.room.allowScreenShare}
+          currentUserId={currentUserId}
+          chatOpen={chatOpen}
+          onToggleChat={() => setChatOpen((v) => !v)}
+        />
       </WaitingGate>
       {canAdmit && session.room.waitingRoom && <HostWaitingPanel slug={session.room.slug} />}
       <RoomAudioRenderer />
