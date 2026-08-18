@@ -3,6 +3,8 @@ import { getAppSettings } from "@/lib/queries/app-settings";
 import { RoomsTable } from "@/components/rooms/rooms-table";
 import { NewRoomButton } from "@/components/rooms/new-room-button";
 
+export const dynamic = "force-dynamic";
+
 export default async function SalasPage() {
   const [rooms, settings] = await Promise.all([getRoomList(), getAppSettings()]);
 

@@ -1,6 +1,8 @@
 import { getAppSettings } from "@/lib/queries/app-settings";
 import { AppSettingsForm } from "@/components/settings/app-settings-form";
 
+export const dynamic = "force-dynamic";
+
 export default async function ConfiguracoesPage() {
   const settings = await getAppSettings();
 
