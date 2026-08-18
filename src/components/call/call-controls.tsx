@@ -14,12 +14,22 @@ import {
   MessageCircle,
   FileText,
   PenLine,
+  Users,
+  Wind,
 } from "lucide-react";
-import { useTrackToggle, useDisconnectButton, useTracks } from "@livekit/components-react";
+import {
+  useTrackToggle,
+  useDisconnectButton,
+  useTracks,
+  useParticipants,
+} from "@livekit/components-react";
+import { useKrispNoiseFilter } from "@livekit/components-react/krisp";
+import { isKrispNoiseFilterSupported } from "@livekit/krisp-noise-filter";
 import { cn } from "@/lib/utils";
 import { SoundboardPanel } from "./soundboard-panel";
 import { BackgroundSelectorPanel } from "./background-selector-panel";
 import { TranscriptionPanel } from "./transcription-panel";
+import { ParticipantsPanel } from "./participants-panel";
 
 function ControlButton({
   active,
@@ -81,11 +91,15 @@ export function CallControls({
     },
   });
   const { buttonProps: disconnectProps } = useDisconnectButton({});
-  const [activePanel, setActivePanel] = useState<"sounds" | "background" | "transcript" | null>(
-    null
-  );
+  const participants = useParticipants();
+  const [noiseFilterSupported] = useState(() => isKrispNoiseFilterSupported());
+  const { setNoiseFilterEnabled, isNoiseFilterEnabled, isNoiseFilterPending } =
+    useKrispNoiseFilter();
+  const [activePanel, setActivePanel] = useState<
+    "sounds" | "background" | "transcript" | "participants" | null
+  >(null);
 
-  function togglePanel(panel: "sounds" | "background" | "transcript") {
+  function togglePanel(panel: "sounds" | "background" | "transcript" | "participants") {
     setActivePanel((current) => (current === panel ? null : panel));
   }
 
@@ -97,6 +111,9 @@ export function CallControls({
       )}
       {activePanel === "transcript" && (
         <TranscriptionPanel roomName={roomName} onClose={() => setActivePanel(null)} />
+      )}
+      {activePanel === "participants" && (
+        <ParticipantsPanel onClose={() => setActivePanel(null)} />
       )}
 
       <div className="glass-panel flex items-center gap-2 rounded-3xl p-2">
@@ -123,6 +140,23 @@ export function CallControls({
             activeGradient="bg-gradient-to-br from-emerald-500 to-teal-500"
           />
         )}
+        {noiseFilterSupported && (
+          <ControlButton
+            active={isNoiseFilterEnabled}
+            disabled={isNoiseFilterPending}
+            icon={<Wind className="size-5" />}
+            label={isNoiseFilterEnabled ? "Anti-ruído on" : "Anti-ruído"}
+            activeGradient="bg-gradient-to-br from-teal-500 to-cyan-600"
+            onClick={() => setNoiseFilterEnabled(!isNoiseFilterEnabled)}
+          />
+        )}
+        <ControlButton
+          active={activePanel === "participants"}
+          icon={<Users className="size-5" />}
+          label={`Pessoas (${participants.length})`}
+          activeGradient="bg-gradient-to-br from-cyan-500 to-teal-600"
+          onClick={() => togglePanel("participants")}
+        />
         <ControlButton
           active={activePanel === "background"}
           icon={<ImageIcon className="size-5" />}

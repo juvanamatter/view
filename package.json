@@ -14,6 +14,7 @@
     "@hookform/resolvers": "^5.5.7",
     "@livekit/components-react": "^2.9.4",
     "@livekit/components-styles": "^1.1.6",
+    "@livekit/krisp-noise-filter": "^0.4.4",
     "@livekit/track-processors": "^0.7.2",
     "@prisma/client": "5.22.0",
     "@vercel/blob": "^2.8.0",

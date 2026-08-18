@@ -23,7 +23,7 @@ export function CallRoom({
   canAdmit: boolean;
   currentUserId: string | null;
 }) {
-  const [chatOpen, setChatOpen] = useState(true);
+  const [chatOpen, setChatOpen] = useState(false);
   const [whiteboardActive, setWhiteboardActive] = useState(false);
 
   return (
@@ -31,7 +31,11 @@ export function CallRoom({
       token={session.token}
       serverUrl={session.livekitUrl}
       video={session.room.cameraOnEntry ? { resolution: VideoPresets.h720.resolution } : false}
-      audio={!session.room.muteOnEntry}
+      audio={
+        session.room.muteOnEntry
+          ? false
+          : { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
+      }
       options={{
         adaptiveStream: true,
         dynacast: true,
@@ -60,7 +64,7 @@ export function CallRoom({
               </div>
               {chatOpen && (
                 <div className="fixed inset-x-4 top-4 bottom-24 z-40 md:static md:inset-auto md:z-auto md:my-2 md:mr-2 md:w-80 md:shrink-0">
-                  <ChatPanel />
+                  <ChatPanel onClose={() => setChatOpen(false)} />
                 </div>
               )}
             </div>

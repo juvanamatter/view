@@ -2,13 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useChat } from "@livekit/components-react";
-import { Send, Smile } from "lucide-react";
+import { Send, Smile, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 const QUICK_EMOJIS = ["😀", "😂", "👍", "❤️", "🎉", "👏", "😮", "🙌", "🤔", "🙏"];
 
-export function ChatPanel() {
+export function ChatPanel({ onClose }: { onClose: () => void }) {
   const { chatMessages, send, isSending } = useChat();
   const [text, setText] = useState("");
   const [showEmojis, setShowEmojis] = useState(false);
@@ -28,8 +28,11 @@ export function ChatPanel() {
 
   return (
     <div className="glass-panel flex h-full w-full flex-col rounded-2xl">
-      <div className="border-b border-border p-3">
+      <div className="flex items-center justify-between border-b border-border p-3">
         <p className="text-sm font-medium">Chat da reunião</p>
+        <button type="button" onClick={onClose} className="text-muted-foreground hover:text-foreground">
+          <X className="size-4" />
+        </button>
       </div>
 
       <div ref={listRef} className="flex-1 space-y-3 overflow-y-auto p-3">
