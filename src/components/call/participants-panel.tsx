@@ -18,7 +18,7 @@ export function ParticipantsPanel({
   return (
     <div
       className={cn(
-        "glass-panel absolute right-0 flex max-h-[70vh] w-72 flex-col gap-2 overflow-hidden rounded-2xl p-3",
+        "glass-panel absolute right-0 z-40 flex max-h-[70vh] w-72 flex-col gap-2 overflow-hidden rounded-2xl p-3",
         position === "above" ? "bottom-full mb-3" : "top-full mt-3"
       )}
     >
