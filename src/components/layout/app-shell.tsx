@@ -15,11 +15,9 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex flex-1 flex-col">
       <header className="glass-panel mx-4 mt-4 flex items-center justify-between rounded-2xl px-4 py-3">
-        <Link href="/" className="flex items-center gap-2.5">
+        <Link href="/" className="flex items-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={settings.logoUrl ?? "/matter-logo.png"} alt={settings.brandName} className="h-6 w-auto" />
-          <span className="h-4 w-px bg-border" />
-          <span className="text-sm text-muted-foreground">{settings.brandName}</span>
+          <img src={settings.logoUrl ?? "/matter-logo.png"} alt={settings.brandName} className="h-11 w-auto" />
         </Link>
         <nav className="flex items-center gap-1">
           {isAdmin && (

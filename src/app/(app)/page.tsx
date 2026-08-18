@@ -58,11 +58,11 @@ export default async function HomePage() {
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-x-5 gap-y-2">
             {features.map(({ icon: Icon, label, color }, i) => (
               <span
                 key={label}
-                className="animate-fade-in-up flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium transition-transform hover:scale-105"
+                className="animate-fade-in-up flex items-center gap-1.5 text-xs font-medium text-muted-foreground"
                 style={{ animationDelay: `${160 + i * 60}ms` }}
               >
                 <Icon
