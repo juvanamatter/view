@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LogOut, Settings, Users, Video } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UserAvatar, userPhotoProps } from "@/components/shared/user-avatar";
 import { logoutAction } from "@/lib/actions/auth";
@@ -7,55 +7,28 @@ import { getCurrentUser } from "@/lib/auth";
 import { PresenceHeartbeat } from "@/components/presence/presence-heartbeat";
 import { OnlineBar } from "@/components/presence/online-bar";
 import { getAppSettings } from "@/lib/queries/app-settings";
+import { SidebarNav } from "./sidebar-nav";
 
 export async function AppShell({ children }: { children: React.ReactNode }) {
   const [user, settings] = await Promise.all([getCurrentUser(), getAppSettings()]);
   const isAdmin = user?.role === "ADMIN";
 
   return (
-    <div className="flex flex-1 flex-col">
-      <header className="glass-panel mx-4 mt-4 flex items-center justify-between rounded-2xl px-4 py-3">
-        <Link href="/" className="flex items-center">
+    <div className="flex flex-1">
+      <aside className="hidden w-60 shrink-0 flex-col border-r border-white/10 p-4 md:flex">
+        <Link href="/" className="flex items-center px-1">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={settings.logoUrl ?? "/matter-logo.png"} alt={settings.brandName} className="h-11 w-auto" />
+          <img src={settings.logoUrl ?? "/matter-logo.png"} alt={settings.brandName} className="h-9 w-auto" />
         </Link>
-        <nav className="flex items-center gap-1">
-          {isAdmin && (
-            <>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="font-semibold transition-opacity hover:opacity-80"
-                style={{ color: settings.salasColor }}
-                render={<Link href="/salas" />}
-              >
-                <Video className="size-4" />
-                Salas
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="font-semibold transition-opacity hover:opacity-80"
-                style={{ color: settings.usuariosColor }}
-                render={<Link href="/usuarios" />}
-              >
-                <Users className="size-4" />
-                Usuários
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="font-semibold transition-opacity hover:opacity-80"
-                style={{ color: settings.configuracoesColor }}
-                render={<Link href="/configuracoes" />}
-              >
-                <Settings className="size-4" />
-                Configurações
-              </Button>
-            </>
-          )}
+        <div className="mt-8">
+          <SidebarNav isAdmin={isAdmin} colors={settings} />
+        </div>
+      </aside>
+
+      <div className="flex flex-1 flex-col">
+        <header className="flex items-center justify-end gap-3 border-b border-white/10 px-6 py-3">
           {user && (
-            <div className="ml-2 flex items-center gap-2 border-l border-border pl-3">
+            <div className="flex items-center gap-2">
               <UserAvatar name={user.name} {...userPhotoProps(user)} className="size-7" />
               <span className="hidden text-sm sm:inline">{user.name}</span>
               <form action={logoutAction}>
@@ -65,9 +38,10 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
               </form>
             </div>
           )}
-        </nav>
-      </header>
-      <main className="flex-1 p-4">{children}</main>
+        </header>
+        <main className="flex-1 p-6">{children}</main>
+      </div>
+
       {user && (
         <>
           <PresenceHeartbeat />

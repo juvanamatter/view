@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Fraunces } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
@@ -8,13 +8,6 @@ import { getAppSettings } from "@/lib/queries/app-settings";
 const inter = Inter({
   variable: "--font-sans",
   subsets: ["latin"],
-});
-
-const fraunces = Fraunces({
-  variable: "--font-display",
-  subsets: ["latin"],
-  style: ["italic", "normal"],
-  axes: ["opsz", "SOFT", "WONK"],
 });
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -42,7 +35,7 @@ export default async function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={`dark ${inter.variable} ${fraunces.variable} h-full antialiased`}
+      className={`dark ${inter.variable} h-full antialiased`}
       style={brandStyle}
     >
       <body className="app-gradient-bg min-h-full flex flex-col text-foreground">
