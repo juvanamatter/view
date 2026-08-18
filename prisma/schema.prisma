@@ -1,0 +1,41 @@
+// Reunião — ferramenta interna de videoconferência (câmeras, áudio, tela compartilhada).
+// Produção: Postgres (Neon). Motor de mídia: LiveKit Cloud (fora do schema).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_UNPOOLED")
+}
+
+// Configurações padrão aplicadas a toda sala nova. Singleton (uma linha só),
+// mesma convenção de AppSettings do Elementa.
+model AppSettings {
+  id                      String   @id @default(cuid())
+  brandName               String   @default("Reunião")
+  defaultMaxParticipants  Int      @default(12)
+  defaultMuteOnEntry      Boolean  @default(false)
+  defaultCameraOnEntry    Boolean  @default(true)
+  defaultAllowScreenShare Boolean  @default(true)
+  defaultWaitingRoom      Boolean  @default(false)
+  updatedAt               DateTime @updatedAt
+}
+
+model Room {
+  id               String   @id @default(cuid())
+  name             String
+  slug             String   @unique
+  hostName         String
+  password         String?
+  maxParticipants  Int      @default(12)
+  muteOnEntry      Boolean  @default(false)
+  cameraOnEntry    Boolean  @default(true)
+  allowScreenShare Boolean  @default(true)
+  waitingRoom      Boolean  @default(false)
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
