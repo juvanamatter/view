@@ -18,15 +18,17 @@ export function PreJoinForm({
   roomName,
   hasPassword,
   waitingRoom,
+  initialName,
   onJoined,
 }: {
   slug: string;
   roomName: string;
   hasPassword: boolean;
   waitingRoom: boolean;
+  initialName: string;
   onJoined: (session: CallSession) => void;
 }) {
-  const [name, setName] = useState("");
+  const [name, setName] = useState(initialName);
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

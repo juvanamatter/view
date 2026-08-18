@@ -25,3 +25,12 @@ export function formatDateTime(date: Date | string) {
     minute: "2-digit",
   }).format(new Date(date));
 }
+
+export function formatDuration(totalSeconds: number) {
+  if (totalSeconds < 60) return "menos de 1min";
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  if (hours === 0) return `${minutes}min`;
+  if (minutes === 0) return `${hours}h`;
+  return `${hours}h ${minutes}min`;
+}

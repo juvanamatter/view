@@ -1,6 +1,6 @@
-import { AdminLoginForm } from "@/components/auth/admin-login-form";
+import { LoginForm } from "@/components/auth/login-form";
 
-export default async function EntrarAdminPage({
+export default async function EntrarPage({
   searchParams,
 }: {
   searchParams: Promise<{ from?: string }>;
@@ -9,7 +9,7 @@ export default async function EntrarAdminPage({
 
   return (
     <div className="flex flex-1 items-center justify-center p-4">
-      <AdminLoginForm from={from} />
+      <LoginForm from={from} />
     </div>
   );
 }

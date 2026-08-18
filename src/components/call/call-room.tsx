@@ -7,8 +7,17 @@ import { WaitingGate } from "./waiting-gate";
 import { VideoConference } from "./video-conference";
 import { CallControls } from "./call-controls";
 import { HostWaitingPanel } from "./host-waiting-panel";
+import { UsageTracker } from "./usage-tracker";
 
-export function CallRoom({ session, isAdmin }: { session: CallSession; isAdmin: boolean }) {
+export function CallRoom({
+  session,
+  canAdmit,
+  currentUserId,
+}: {
+  session: CallSession;
+  canAdmit: boolean;
+  currentUserId: string | null;
+}) {
   return (
     <LiveKitRoom
       token={session.token}
@@ -26,10 +35,11 @@ export function CallRoom({ session, isAdmin }: { session: CallSession; isAdmin: 
         <div className="min-h-0 flex-1 overflow-hidden">
           <VideoConference />
         </div>
-        <CallControls allowScreenShare={session.room.allowScreenShare} />
+        <CallControls allowScreenShare={session.room.allowScreenShare} currentUserId={currentUserId} />
       </WaitingGate>
-      {isAdmin && session.room.waitingRoom && <HostWaitingPanel slug={session.room.slug} />}
+      {canAdmit && session.room.waitingRoom && <HostWaitingPanel slug={session.room.slug} />}
       <RoomAudioRenderer />
+      <UsageTracker userId={currentUserId} />
     </LiveKitRoom>
   );
 }

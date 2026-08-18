@@ -1,1 +1,1 @@
-export const ADMIN_COOKIE_NAME = "reuniao_admin";
+export const SESSION_COOKIE_NAME = "reuniao_session";

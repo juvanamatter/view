@@ -1,13 +1,24 @@
 import { NextResponse } from "next/server";
-import { isAdminSession } from "@/lib/auth";
+import { getSession } from "@/lib/auth";
+import { getRoomBySlug } from "@/lib/queries/rooms";
 import { getRoomServiceClient } from "@/lib/livekit";
 
 export async function POST(request: Request, context: { params: Promise<{ slug: string }> }) {
-  if (!(await isAdminSession())) {
+  const session = await getSession();
+  if (!session) {
     return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
   }
 
   const { slug } = await context.params;
+  const room = await getRoomBySlug(slug);
+  if (!room) {
+    return NextResponse.json({ error: "Sala não encontrada." }, { status: 404 });
+  }
+  const isOwner = room.createdByUserId === session.sub;
+  if (session.role !== "ADMIN" && !isOwner) {
+    return NextResponse.json({ error: "Não autorizado." }, { status: 403 });
+  }
+
   const body = await request.json().catch(() => null);
   const identity = body?.identity;
   if (typeof identity !== "string" || !identity) {

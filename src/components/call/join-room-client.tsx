@@ -5,23 +5,27 @@ import { PreJoinForm } from "./pre-join-form";
 import { CallRoom } from "./call-room";
 import type { CallSession } from "@/lib/call-types";
 
+type CurrentUser = { id: string; name: string } | null;
+
 export function JoinRoomClient({
   slug,
   roomName,
   hasPassword,
   waitingRoom,
-  isAdmin,
+  canAdmit,
+  currentUser,
 }: {
   slug: string;
   roomName: string;
   hasPassword: boolean;
   waitingRoom: boolean;
-  isAdmin: boolean;
+  canAdmit: boolean;
+  currentUser: CurrentUser;
 }) {
   const [session, setSession] = useState<CallSession | null>(null);
 
   if (session) {
-    return <CallRoom session={session} isAdmin={isAdmin} />;
+    return <CallRoom session={session} canAdmit={canAdmit} currentUserId={currentUser?.id ?? null} />;
   }
 
   return (
@@ -30,6 +34,7 @@ export function JoinRoomClient({
       roomName={roomName}
       hasPassword={hasPassword}
       waitingRoom={waitingRoom}
+      initialName={currentUser?.name ?? ""}
       onJoined={setSession}
     />
   );

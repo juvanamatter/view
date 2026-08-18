@@ -1,10 +1,10 @@
 import { getRoomBySlug } from "@/lib/queries/rooms";
-import { isAdminSession } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/auth";
 import { JoinRoomClient } from "@/components/call/join-room-client";
 
 export default async function RoomPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const [room, admin] = await Promise.all([getRoomBySlug(slug), isAdminSession()]);
+  const [room, user] = await Promise.all([getRoomBySlug(slug), getCurrentUser()]);
 
   if (!room || !room.isActive) {
     return (
@@ -19,13 +19,16 @@ export default async function RoomPage({ params }: { params: Promise<{ slug: str
     );
   }
 
+  const canAdmit = user ? user.role === "ADMIN" || user.id === room.createdByUserId : false;
+
   return (
     <JoinRoomClient
       slug={room.slug}
       roomName={room.name}
       hasPassword={Boolean(room.password)}
       waitingRoom={room.waitingRoom}
-      isAdmin={admin}
+      canAdmit={canAdmit}
+      currentUser={user ? { id: user.id, name: user.name } : null}
     />
   );
 }

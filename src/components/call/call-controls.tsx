@@ -37,10 +37,23 @@ function ControlButton({
   );
 }
 
-export function CallControls({ allowScreenShare }: { allowScreenShare: boolean }) {
+export function CallControls({
+  allowScreenShare,
+  currentUserId,
+}: {
+  allowScreenShare: boolean;
+  currentUserId: string | null;
+}) {
   const mic = useTrackToggle({ source: Track.Source.Microphone });
   const cam = useTrackToggle({ source: Track.Source.Camera });
-  const screen = useTrackToggle({ source: Track.Source.ScreenShare });
+  const screen = useTrackToggle({
+    source: Track.Source.ScreenShare,
+    onChange: (enabled, isUserInitiated) => {
+      if (enabled && isUserInitiated && currentUserId) {
+        fetch("/api/stats/screen-share", { method: "POST" }).catch(() => {});
+      }
+    },
+  });
   const { buttonProps: disconnectProps } = useDisconnectButton({});
   const [activePanel, setActivePanel] = useState<"sounds" | "background" | null>(null);
 

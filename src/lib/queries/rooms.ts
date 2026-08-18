@@ -11,3 +11,10 @@ export function getRoomBySlug(slug: string) {
 export function getRoomById(id: string) {
   return prisma.room.findUnique({ where: { id } });
 }
+
+export function getRoomsByCreator(userId: string) {
+  return prisma.room.findMany({
+    where: { createdByUserId: userId },
+    orderBy: { createdAt: "desc" },
+  });
+}

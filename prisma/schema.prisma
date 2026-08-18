@@ -24,6 +24,25 @@ model AppSettings {
   updatedAt               DateTime @updatedAt
 }
 
+// Conta de acesso. ADMIN gerencia usuários/salas/configurações; USER só entra e cria
+// salas instantâneas. activeSeconds/screenShareCount são estatísticas de uso reportadas
+// pelo próprio cliente durante a chamada (não há infra de webhook do LiveKit).
+model User {
+  id               String   @id @default(cuid())
+  name             String
+  email            String   @unique
+  passwordHash     String
+  role             String   @default("USER") // "ADMIN" | "USER"
+  jobTitle         String?
+  photoUrl         String?
+  activeSeconds    Int      @default(0)
+  screenShareCount Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  rooms Room[]
+}
+
 model Room {
   id               String   @id @default(cuid())
   name             String
@@ -36,6 +55,9 @@ model Room {
   allowScreenShare Boolean  @default(true)
   waitingRoom      Boolean  @default(false)
   isActive         Boolean  @default(true)
+  isInstant        Boolean  @default(false)
+  createdByUserId  String?
+  createdBy        User?    @relation(fields: [createdByUserId], references: [id], onDelete: SetNull)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 }
