@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { Plus, Video } from "lucide-react";
+import { MonitorUp, Mic, PartyPopper, Plus, Video } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import { getRoomsByCreator } from "@/lib/queries/rooms";
+import { getAppSettings } from "@/lib/queries/app-settings";
 import { createInstantRoomAction } from "@/lib/actions/rooms";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { CopyLinkButton } from "@/components/home/copy-link-button";
 
 export const dynamic = "force-dynamic";
@@ -13,31 +13,77 @@ export default async function HomePage() {
   const user = await getCurrentUser();
   if (!user) return null;
 
-  const rooms = await getRoomsByCreator(user.id);
+  const [rooms, settings] = await Promise.all([getRoomsByCreator(user.id), getAppSettings()]);
+
+  const features = [
+    { icon: Video, label: "Câmera", color: settings.salasColor },
+    { icon: Mic, label: "Áudio", color: settings.usuariosColor },
+    { icon: MonitorUp, label: "Compartilhamento de tela", color: settings.configuracoesColor },
+    { icon: PartyPopper, label: "Diversão", color: settings.primaryColor },
+  ];
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Olá, {user.name.split(" ")[0]}</h1>
-        <p className="mt-0.5 text-sm text-muted-foreground">
-          Crie uma sala agora mesmo ou entre em uma que você já criou.
-        </p>
-      </div>
+      <div className="glass-card relative overflow-hidden p-6 sm:p-8">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-24 -right-20 size-64 rounded-full blur-3xl"
+          style={{ background: settings.primaryColor, opacity: 0.22 }}
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -bottom-28 -left-16 size-56 rounded-full blur-3xl"
+          style={{ background: settings.usuariosColor, opacity: 0.16 }}
+        />
 
-      <Card className="glass-card">
-        <CardHeader>
-          <CardTitle>Nova sala instantânea</CardTitle>
-          <CardDescription>Cria um link novo na hora, com as configurações padrão.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form action={createInstantRoomAction}>
-            <Button type="submit">
-              <Plus className="size-4" />
-              Criar sala agora
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+        <div className="relative space-y-5">
+          <div>
+            <p
+              className="animate-fade-in-up text-sm font-medium text-muted-foreground"
+              style={{ animationDelay: "0ms" }}
+            >
+              Bem-vindo(a) ao {settings.brandName} 👋
+            </p>
+            <h1
+              className="animate-fade-in-up mt-1 text-3xl font-semibold sm:text-4xl"
+              style={{ animationDelay: "60ms" }}
+            >
+              Olá, {user.name.split(" ")[0]}
+            </h1>
+            <p
+              className="animate-fade-in-up mt-2 max-w-md text-sm text-muted-foreground sm:text-base"
+              style={{ animationDelay: "120ms" }}
+            >
+              Câmera, áudio, compartilhamento de tela e diversão. Tudo em um lugar só.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            {features.map(({ icon: Icon, label, color }, i) => (
+              <span
+                key={label}
+                className="animate-fade-in-up flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium transition-transform hover:scale-105"
+                style={{ animationDelay: `${160 + i * 60}ms` }}
+              >
+                <Icon
+                  className="animate-float size-3.5"
+                  style={{ color, animationDelay: `${i * 250}ms` }}
+                />
+                {label}
+              </span>
+            ))}
+          </div>
+
+          <div className="animate-fade-in-up" style={{ animationDelay: "420ms" }}>
+            <form action={createInstantRoomAction}>
+              <Button type="submit" size="lg" className="shadow-lg shadow-primary/20">
+                <Plus className="size-4" />
+                Criar sala agora
+              </Button>
+            </form>
+          </div>
+        </div>
+      </div>
 
       <div className="space-y-3">
         <h2 className="text-sm font-medium text-muted-foreground">Suas salas</h2>
