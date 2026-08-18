@@ -51,7 +51,7 @@ export function OnlineBar() {
         {collapsed ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
       </button>
       {!collapsed && (
-        <div className="max-h-80 space-y-1 overflow-y-auto border-t border-border p-2">
+        <div className="max-h-[70vh] space-y-1 overflow-y-auto border-t border-border p-2">
           {users.map((user) => (
             <div
               key={user.id}
