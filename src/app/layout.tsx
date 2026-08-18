@@ -15,6 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: settings.brandName,
     description: "Reuniões por vídeo com câmera, áudio e compartilhamento de tela.",
+    icons: settings.faviconUrl ? { icon: settings.faviconUrl } : undefined,
   };
 }
 

@@ -17,6 +17,7 @@ model AppSettings {
   id                      String   @id @default(cuid())
   brandName               String   @default("Reunião")
   logoUrl                 String?
+  faviconUrl              String?
   primaryColor            String   @default("#8b5cf6")
   salasColor              String   @default("#a78bfa")
   usuariosColor           String   @default("#fb923c")

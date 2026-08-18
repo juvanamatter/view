@@ -9,6 +9,9 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { updateBrandSettingsAction } from "@/lib/actions/app-settings";
 import type { BrandSettingsInput } from "@/lib/validators/app-settings";
+import { ImageCropDialog } from "./image-crop-dialog";
+
+type CropTarget = "logo" | "favicon";
 
 function ColorField({
   id,
@@ -45,35 +48,45 @@ export function BrandSettingsForm({ settings }: { settings: AppSettings }) {
   const [form, setForm] = useState<BrandSettingsInput>({
     brandName: settings.brandName,
     logoUrl: settings.logoUrl,
+    faviconUrl: settings.faviconUrl,
     primaryColor: settings.primaryColor,
     salasColor: settings.salasColor,
     usuariosColor: settings.usuariosColor,
     configuracoesColor: settings.configuracoesColor,
   });
   const [pending, setPending] = useState(false);
-  const [uploadingLogo, setUploadingLogo] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [crop, setCrop] = useState<{ target: CropTarget; source: string } | null>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const faviconInputRef = useRef<HTMLInputElement>(null);
 
   function update<K extends keyof BrandSettingsInput>(key: K, value: BrandSettingsInput[K]) {
     setForm((f) => ({ ...f, [key]: value }));
   }
 
-  async function handleLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
-    setUploadingLogo(true);
+  function handleFileSelected(target: CropTarget) {
+    return (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      e.target.value = "";
+      if (!file) return;
+      setCrop({ target, source: URL.createObjectURL(file) });
+    };
+  }
+
+  async function handleCropSave(blob: Blob) {
+    if (!crop) return;
+    const { target, source } = crop;
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("file", new File([blob], `${target}.png`, { type: "image/png" }));
     const res = await fetch("/api/settings/logo", { method: "POST", body: formData });
-    setUploadingLogo(false);
+    if (source.startsWith("blob:")) URL.revokeObjectURL(source);
     if (!res.ok) {
-      toast.error("Não foi possível enviar a logo.");
+      toast.error("Não foi possível enviar a imagem.");
       return;
     }
     const data = await res.json();
-    update("logoUrl", data.url);
+    update(target === "logo" ? "logoUrl" : "faviconUrl", data.url);
+    setCrop(null);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -108,14 +121,16 @@ export function BrandSettingsForm({ settings }: { settings: AppSettings }) {
                 alt="Logo atual"
                 className="h-8 w-auto rounded bg-white/5 px-1"
               />
+              <Button type="button" variant="outline" size="sm" onClick={() => logoInputRef.current?.click()}>
+                Trocar logo
+              </Button>
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                disabled={uploadingLogo}
-                onClick={() => fileInputRef.current?.click()}
+                onClick={() => setCrop({ target: "logo", source: form.logoUrl ?? "/matter-logo.png" })}
               >
-                {uploadingLogo ? "Enviando..." : "Trocar logo"}
+                Ajustar
               </Button>
               {form.logoUrl && (
                 <Button type="button" variant="ghost" size="sm" onClick={() => update("logoUrl", null)}>
@@ -124,11 +139,46 @@ export function BrandSettingsForm({ settings }: { settings: AppSettings }) {
               )}
             </div>
             <input
-              ref={fileInputRef}
+              ref={logoInputRef}
               type="file"
               accept="image/*"
               className="hidden"
-              onChange={handleLogoChange}
+              onChange={handleFileSelected("logo")}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>Ícone da aba (favicon)</Label>
+            <div className="flex items-center gap-3">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={form.faviconUrl ?? "/icon.png"}
+                alt="Favicon atual"
+                className="size-8 rounded bg-white/5 object-contain p-0.5"
+              />
+              <Button type="button" variant="outline" size="sm" onClick={() => faviconInputRef.current?.click()}>
+                Trocar ícone
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setCrop({ target: "favicon", source: form.faviconUrl ?? "/icon.png" })}
+              >
+                Ajustar
+              </Button>
+              {form.faviconUrl && (
+                <Button type="button" variant="ghost" size="sm" onClick={() => update("faviconUrl", null)}>
+                  Usar padrão
+                </Button>
+              )}
+            </div>
+            <input
+              ref={faviconInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleFileSelected("favicon")}
             />
           </div>
 
@@ -179,6 +229,18 @@ export function BrandSettingsForm({ settings }: { settings: AppSettings }) {
           </Button>
         </form>
       </CardContent>
+
+      <ImageCropDialog
+        open={crop !== null}
+        onOpenChange={(open) => {
+          if (!open) setCrop(null);
+        }}
+        imageUrl={crop?.source ?? ""}
+        aspect={crop?.target === "favicon" ? 1 : 3}
+        outputWidth={crop?.target === "favicon" ? 512 : 1200}
+        title={crop?.target === "favicon" ? "Ajustar ícone da aba" : "Ajustar logo"}
+        onSave={handleCropSave}
+      />
     </Card>
   );
 }

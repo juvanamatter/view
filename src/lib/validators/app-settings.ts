@@ -19,6 +19,11 @@ export const brandSettingsSchema = z.object({
     .nullable()
     .optional()
     .transform((v) => (v ? v : null)),
+  faviconUrl: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((v) => (v ? v : null)),
   primaryColor: hexColor,
   salasColor: hexColor,
   usuariosColor: hexColor,
