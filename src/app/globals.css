@@ -237,3 +237,54 @@
 ::-webkit-scrollbar-thumb:hover {
   background: color-mix(in oklch, white 22%, transparent);
 }
+
+/* Tema do LiveKit remapeado pra paleta roxa do app, em vez do cinza/preto padrão. */
+[data-lk-theme="reuniao"] {
+  color-scheme: dark;
+  --lk-bg: transparent;
+  --lk-bg2: oklch(0.27 0.055 300 / 68%);
+  --lk-bg3: var(--accent);
+  --lk-bg4: var(--accent);
+  --lk-bg5: var(--accent);
+  --lk-fg: var(--foreground);
+  --lk-fg2: var(--foreground);
+  --lk-fg3: var(--muted-foreground);
+  --lk-fg4: var(--muted-foreground);
+  --lk-fg5: var(--muted-foreground);
+  --lk-border-color: color-mix(in oklch, white 10%, transparent);
+  --lk-accent-fg: var(--primary-foreground);
+  --lk-accent-bg: var(--primary);
+  --lk-accent2: var(--primary);
+  --lk-accent3: var(--primary);
+  --lk-accent4: var(--primary);
+  --lk-danger-fg: #fff;
+  --lk-danger: var(--status-critical);
+  --lk-danger2: var(--status-critical);
+  --lk-danger3: var(--status-critical);
+  --lk-danger4: var(--status-critical);
+  --lk-success: var(--status-good);
+  --lk-success-fg: #fff;
+  --lk-control-fg: var(--lk-fg);
+  --lk-control-bg: var(--lk-bg2);
+  --lk-control-hover-bg: var(--lk-bg3);
+  --lk-control-active-bg: var(--lk-bg4);
+  --lk-control-active-hover-bg: var(--lk-bg5);
+  --lk-connection-excellent: var(--status-good);
+  --lk-connection-good: var(--status-warning);
+  --lk-connection-poor: var(--status-critical);
+  --lk-font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  --lk-font-size: 16px;
+  --lk-line-height: 1.5;
+  --lk-border-radius: var(--radius-xl);
+  --lk-box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+  --lk-drop-shadow: rgba(255, 255, 255, 0.15) 0px 0px 24px;
+  --lk-grid-gap: 0.75rem;
+  --lk-control-bar-height: 0px;
+}
+
+[data-lk-theme="reuniao"] .lk-participant-tile {
+  background: oklch(0.27 0.055 300 / 68%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid color-mix(in oklch, white 10%, transparent);
+}

@@ -13,7 +13,7 @@ export function VideoConference() {
   );
 
   return (
-    <GridLayout tracks={tracks} style={{ height: "calc(100dvh - var(--lk-control-bar-height))" }}>
+    <GridLayout tracks={tracks} style={{ height: "100%" }}>
       <ParticipantTile />
     </GridLayout>
   );
