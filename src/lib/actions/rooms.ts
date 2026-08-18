@@ -78,3 +78,40 @@ export async function createInstantRoomAction() {
 
   redirect(`/sala/${room.slug}`);
 }
+
+export async function createScheduledRoomAction(input: {
+  name: string;
+  scheduledAt: string;
+}): Promise<RoomActionResult> {
+  const session = await getSession();
+  if (!session) return { error: "Não autorizado." };
+  const user = await getCurrentUser();
+  if (!user) return { error: "Não autorizado." };
+
+  const name = input.name.trim().slice(0, 80);
+  if (!name) return { error: "Informe um nome para a reunião." };
+
+  const scheduledAt = new Date(input.scheduledAt);
+  if (Number.isNaN(scheduledAt.getTime())) {
+    return { error: "Data e hora inválidas." };
+  }
+
+  const settings = await getAppSettings();
+  await prisma.room.create({
+    data: {
+      name,
+      slug: generateInstantSlug(),
+      hostName: user.name,
+      maxParticipants: settings.defaultMaxParticipants,
+      muteOnEntry: settings.defaultMuteOnEntry,
+      cameraOnEntry: settings.defaultCameraOnEntry,
+      allowScreenShare: settings.defaultAllowScreenShare,
+      waitingRoom: settings.defaultWaitingRoom,
+      scheduledAt,
+      createdByUserId: user.id,
+    },
+  });
+
+  revalidatePath("/");
+  return { success: true };
+}

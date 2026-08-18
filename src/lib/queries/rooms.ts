@@ -19,6 +19,14 @@ export function getRoomsByCreator(userId: string) {
   });
 }
 
+export function getUpcomingScheduledRooms(userId: string, limit = 5) {
+  return prisma.room.findMany({
+    where: { createdByUserId: userId, scheduledAt: { gte: new Date() } },
+    orderBy: { scheduledAt: "asc" },
+    take: limit,
+  });
+}
+
 export async function getRecentRoomVisits(userId: string, limit = 5) {
   const visits = await prisma.roomVisit.findMany({
     where: { userId },

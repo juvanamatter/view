@@ -8,6 +8,7 @@ import { PresenceHeartbeat } from "@/components/presence/presence-heartbeat";
 import { OnlineBar } from "@/components/presence/online-bar";
 import { getAppSettings } from "@/lib/queries/app-settings";
 import { SidebarNav } from "./sidebar-nav";
+import { SearchBar } from "./search-bar";
 
 export async function AppShell({ children }: { children: React.ReactNode }) {
   const [user, settings] = await Promise.all([getCurrentUser(), getAppSettings()]);
@@ -26,7 +27,8 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <div className="flex flex-1 flex-col">
-        <header className="flex items-center justify-end gap-3 border-b border-white/10 px-6 py-3">
+        <header className="flex items-center justify-between gap-3 border-b border-white/10 px-6 py-3">
+          {user ? <SearchBar /> : <div />}
           {user && (
             <div className="flex items-center gap-2">
               <UserAvatar name={user.name} {...userPhotoProps(user)} className="size-7" />

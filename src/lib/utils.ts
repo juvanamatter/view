@@ -38,6 +38,20 @@ export function formatLastSeen(date: Date | string | null) {
   return `Visto há ${diffDays}d`;
 }
 
+export function formatScheduled(date: Date | string) {
+  const target = new Date(date);
+  const now = new Date();
+  const time = new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit" }).format(target);
+
+  const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const diffDays = Math.round((startOfDay(target) - startOfDay(now)) / 86_400_000);
+
+  if (diffDays === 0) return `Hoje às ${time}`;
+  if (diffDays === 1) return `Amanhã às ${time}`;
+  const day = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short" }).format(target);
+  return `${day} às ${time}`;
+}
+
 export function formatDuration(totalSeconds: number) {
   if (totalSeconds < 60) return "menos de 1min";
   const hours = Math.floor(totalSeconds / 3600);

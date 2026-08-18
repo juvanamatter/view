@@ -1,33 +1,38 @@
 import Link from "next/link";
 import { Plus, Video } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
-import { getRoomsByCreator, getRecentRoomVisits } from "@/lib/queries/rooms";
+import { getRecentRoomVisits, getUpcomingScheduledRooms } from "@/lib/queries/rooms";
 import { getAppSettings } from "@/lib/queries/app-settings";
 import { createInstantRoomAction } from "@/lib/actions/rooms";
 import { countActiveParticipants } from "@/lib/livekit";
 import { Button } from "@/components/ui/button";
-import { CopyLinkButton } from "@/components/home/copy-link-button";
 import { JoinByCodeForm } from "@/components/home/join-by-code-form";
 import { TimeGreeting } from "@/components/home/time-greeting";
-import { formatLastSeen } from "@/lib/utils";
+import { ScheduleMeetingButton } from "@/components/home/schedule-meeting-dialog";
+import { formatLastSeen, formatScheduled } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
+
+function RoomIcon() {
+  return (
+    <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-fuchsia-500 to-purple-600">
+      <Video className="size-4 text-white" />
+    </span>
+  );
+}
 
 export default async function HomePage() {
   const user = await getCurrentUser();
   if (!user) return null;
 
-  const [rooms, recentVisits, settings] = await Promise.all([
-    getRoomsByCreator(user.id),
+  const [recentVisits, scheduledRooms, settings] = await Promise.all([
     getRecentRoomVisits(user.id),
+    getUpcomingScheduledRooms(user.id),
     getAppSettings(),
   ]);
 
-  const uniqueSlugs = Array.from(
-    new Set([...rooms.map((r) => r.slug), ...recentVisits.map((v) => v.room.slug)])
-  );
   const liveCounts = await Promise.all(
-    uniqueSlugs.map(async (slug) => [slug, await countActiveParticipants(slug)] as const)
+    recentVisits.map(async ({ room }) => [room.slug, await countActiveParticipants(room.slug)] as const)
   );
   const liveBySlug = new Map(liveCounts);
 
@@ -59,16 +64,7 @@ export default async function HomePage() {
                 <span className="text-xs text-muted-foreground">Inicie uma sala instantânea</span>
               </button>
             </form>
-            <Link
-              href="#suas-salas"
-              className="flex flex-col items-start gap-2 rounded-xl border border-white/10 p-4 text-left transition-colors hover:bg-white/5"
-            >
-              <span className="flex size-9 items-center justify-center rounded-lg bg-gradient-to-br from-fuchsia-500 to-purple-600">
-                <Video className="size-4 text-white" />
-              </span>
-              <span className="font-medium">Suas salas</span>
-              <span className="text-xs text-muted-foreground">Veja e compartilhe seus links</span>
-            </Link>
+            <ScheduleMeetingButton />
           </div>
         </div>
 
@@ -87,50 +83,6 @@ export default async function HomePage() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
-        <section id="suas-salas" className="space-y-3">
-          <h2 className="text-sm font-medium text-muted-foreground">Suas salas</h2>
-          {rooms.length === 0 ? (
-            <div className="glass-card p-6 text-center text-sm text-muted-foreground">
-              Você ainda não criou nenhuma sala.
-            </div>
-          ) : (
-            <div className="glass-card divide-y divide-border">
-              {rooms.map((room) => {
-                const isLive = (liveBySlug.get(room.slug) ?? 0) > 0;
-                return (
-                  <div key={room.id} className="flex items-center justify-between gap-3 p-3">
-                    <div className="flex items-center gap-2.5 overflow-hidden">
-                      <Video className="size-4 shrink-0 text-primary" />
-                      <div className="flex flex-col overflow-hidden">
-                        <span className="flex items-center gap-2 truncate font-medium">
-                          {room.name}
-                          {isLive && (
-                            <span
-                              className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold text-white"
-                              style={{ background: settings.primaryColor }}
-                            >
-                              Ao vivo
-                            </span>
-                          )}
-                        </span>
-                        <span className="truncate text-xs text-muted-foreground">
-                          /sala/{room.slug} · até {room.maxParticipants} participantes
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex shrink-0 items-center gap-2">
-                      <CopyLinkButton slug={room.slug} />
-                      <Button size="sm" render={<Link href={`/sala/${room.slug}`} />}>
-                        Entrar
-                      </Button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </section>
-
         <section className="space-y-3">
           <h2 className="text-sm font-medium text-muted-foreground">Últimas reuniões</h2>
           {recentVisits.length === 0 ? (
@@ -139,16 +91,59 @@ export default async function HomePage() {
             </div>
           ) : (
             <div className="glass-card divide-y divide-border">
-              {recentVisits.map(({ room, joinedAt }) => (
-                <div key={room.id} className="flex items-center justify-between gap-3 p-3">
-                  <div className="flex items-center gap-2.5 overflow-hidden">
-                    <Video className="size-4 shrink-0 text-primary" />
-                    <div className="flex flex-col overflow-hidden">
-                      <span className="truncate font-medium">{room.name}</span>
+              {recentVisits.map(({ room, joinedAt }) => {
+                const isLive = (liveBySlug.get(room.slug) ?? 0) > 0;
+                return (
+                  <div key={room.id} className="flex items-center gap-3 p-3">
+                    <RoomIcon />
+                    <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+                      <span className="flex items-center gap-2 truncate font-medium">
+                        {room.name}
+                        {isLive && (
+                          <span
+                            className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold text-white"
+                            style={{ background: settings.primaryColor }}
+                          >
+                            Ao vivo
+                          </span>
+                        )}
+                      </span>
                       <span className="truncate text-xs text-muted-foreground">
-                        {formatLastSeen(joinedAt)}
+                        {formatLastSeen(joinedAt)} · {room.hostName}
                       </span>
                     </div>
+                    <Button
+                      size="sm"
+                      className={isLive ? "bg-gradient-to-br from-fuchsia-500 to-purple-600" : undefined}
+                      render={<Link href={`/sala/${room.slug}`} />}
+                    >
+                      Entrar
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
+
+        <section className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-medium text-muted-foreground">Reuniões agendadas</h2>
+          </div>
+          {scheduledRooms.length === 0 ? (
+            <div className="glass-card p-6 text-center text-sm text-muted-foreground">
+              Nenhuma reunião agendada.
+            </div>
+          ) : (
+            <div className="glass-card divide-y divide-border">
+              {scheduledRooms.map((room) => (
+                <div key={room.id} className="flex items-center gap-3 p-3">
+                  <RoomIcon />
+                  <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+                    <span className="truncate font-medium">{room.name}</span>
+                    <span className="truncate text-xs text-muted-foreground">
+                      {room.scheduledAt ? formatScheduled(room.scheduledAt) : ""}
+                    </span>
                   </div>
                   <Button size="sm" variant="outline" render={<Link href={`/sala/${room.slug}`} />}>
                     Entrar
