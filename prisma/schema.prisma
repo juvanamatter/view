@@ -35,6 +35,9 @@ model User {
   role             String   @default("USER") // "ADMIN" | "USER"
   jobTitle         String?
   photoUrl         String?
+  photoPositionX   Float    @default(50)
+  photoPositionY   Float    @default(50)
+  photoZoom        Float    @default(1)
   activeSeconds    Int      @default(0)
   screenShareCount Int      @default(0)
   createdAt        DateTime @default(now())

@@ -19,6 +19,9 @@ export const userSchema = z.object({
     .nullable()
     .optional()
     .transform((v) => (v ? v : null)),
+  photoPositionX: z.coerce.number().min(0).max(100),
+  photoPositionY: z.coerce.number().min(0).max(100),
+  photoZoom: z.coerce.number().min(1).max(3),
 });
 
 export type UserInput = z.infer<typeof userSchema>;

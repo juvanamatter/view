@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { UserAvatar } from "@/components/shared/user-avatar";
+import { PhotoRepositionDialog } from "@/components/shared/photo-reposition-dialog";
 import { createUserAction, updateUserAction } from "@/lib/actions/users";
 import type { UserInput } from "@/lib/validators/user";
 
@@ -24,6 +25,9 @@ export type UserRecord = {
   role: string;
   jobTitle: string | null;
   photoUrl: string | null;
+  photoPositionX: number;
+  photoPositionY: number;
+  photoZoom: number;
 };
 
 function buildInitialForm(user: UserRecord | undefined): UserInput {
@@ -34,6 +38,9 @@ function buildInitialForm(user: UserRecord | undefined): UserInput {
     role: (user?.role as "ADMIN" | "USER") ?? "USER",
     jobTitle: user?.jobTitle ?? null,
     photoUrl: user?.photoUrl ?? null,
+    photoPositionX: user?.photoPositionX ?? 50,
+    photoPositionY: user?.photoPositionY ?? 50,
+    photoZoom: user?.photoZoom ?? 1,
   };
 }
 
@@ -42,6 +49,7 @@ function UserForm({ user, onSaved }: { user?: UserRecord; onSaved: () => void })
   const [form, setForm] = useState<UserInput>(() => buildInitialForm(user));
   const [pending, setPending] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [repositionOpen, setRepositionOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -63,7 +71,7 @@ function UserForm({ user, onSaved }: { user?: UserRecord; onSaved: () => void })
       return;
     }
     const data = await res.json();
-    update("photoUrl", data.url);
+    setForm((f) => ({ ...f, photoUrl: data.url, photoPositionX: 50, photoPositionY: 50, photoZoom: 1 }));
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -83,16 +91,30 @@ function UserForm({ user, onSaved }: { user?: UserRecord; onSaved: () => void })
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4 px-4 pb-4">
       <div className="flex items-center gap-3">
-        <UserAvatar name={form.name || "?"} photoUrl={form.photoUrl} className="size-14 text-lg" />
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          disabled={uploadingPhoto}
-          onClick={() => fileInputRef.current?.click()}
-        >
-          {uploadingPhoto ? "Enviando..." : "Trocar foto"}
-        </Button>
+        <UserAvatar
+          name={form.name || "?"}
+          photoUrl={form.photoUrl}
+          positionX={form.photoPositionX}
+          positionY={form.photoPositionY}
+          zoom={form.photoZoom}
+          className="size-14"
+        />
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={uploadingPhoto}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            {uploadingPhoto ? "Enviando..." : "Trocar foto"}
+          </Button>
+          {form.photoUrl && (
+            <Button type="button" variant="outline" size="sm" onClick={() => setRepositionOpen(true)}>
+              Reposicionar
+            </Button>
+          )}
+        </div>
         <input
           ref={fileInputRef}
           type="file"
@@ -101,6 +123,23 @@ function UserForm({ user, onSaved }: { user?: UserRecord; onSaved: () => void })
           onChange={handlePhotoChange}
         />
       </div>
+
+      {form.photoUrl && (
+        <PhotoRepositionDialog
+          open={repositionOpen}
+          onOpenChange={setRepositionOpen}
+          photoUrl={form.photoUrl}
+          initial={{ x: form.photoPositionX, y: form.photoPositionY, zoom: form.photoZoom }}
+          onSave={(position) =>
+            setForm((f) => ({
+              ...f,
+              photoPositionX: position.x,
+              photoPositionY: position.y,
+              photoZoom: position.zoom,
+            }))
+          }
+        />
+      )}
 
       <div className="space-y-1.5">
         <Label htmlFor="name">Nome</Label>

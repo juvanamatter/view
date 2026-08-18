@@ -7,7 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { UserAvatar } from "@/components/shared/user-avatar";
+import { UserAvatar, userPhotoProps } from "@/components/shared/user-avatar";
 import { formatDateTime, formatDuration } from "@/lib/utils";
 import { UserRowActions } from "./user-row-actions";
 
@@ -18,6 +18,9 @@ export type UserRow = {
   role: string;
   jobTitle: string | null;
   photoUrl: string | null;
+  photoPositionX: number;
+  photoPositionY: number;
+  photoZoom: number;
   activeSeconds: number;
   screenShareCount: number;
   createdAt: Date;
@@ -54,7 +57,7 @@ export function UsersTable({ users }: { users: UserRow[] }) {
             <TableRow key={user.id}>
               <TableCell>
                 <div className="flex items-center gap-2.5">
-                  <UserAvatar name={user.name} photoUrl={user.photoUrl} />
+                  <UserAvatar name={user.name} {...userPhotoProps(user)} />
                   <div className="flex flex-col">
                     <span className="font-medium">{user.name}</span>
                     <span className="text-xs text-muted-foreground">{user.email}</span>

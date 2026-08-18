@@ -33,6 +33,9 @@ export async function createUserAction(input: UserInput): Promise<UserActionResu
       role: parsed.data.role,
       jobTitle: parsed.data.jobTitle,
       photoUrl: parsed.data.photoUrl,
+      photoPositionX: parsed.data.photoPositionX,
+      photoPositionY: parsed.data.photoPositionY,
+      photoZoom: parsed.data.photoZoom,
     },
   });
   revalidatePath("/usuarios");

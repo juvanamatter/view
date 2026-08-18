@@ -60,6 +60,9 @@ export async function getCurrentUser() {
       role: true,
       jobTitle: true,
       photoUrl: true,
+      photoPositionX: true,
+      photoPositionY: true,
+      photoZoom: true,
     },
   });
 }

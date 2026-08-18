@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { LogOut, Settings, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { UserAvatar } from "@/components/shared/user-avatar";
+import { UserAvatar, userPhotoProps } from "@/components/shared/user-avatar";
 import { logoutAction } from "@/lib/actions/auth";
 import { getCurrentUser } from "@/lib/auth";
 
@@ -36,7 +36,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
           )}
           {user && (
             <div className="ml-2 flex items-center gap-2 border-l border-border pl-3">
-              <UserAvatar name={user.name} photoUrl={user.photoUrl} className="size-7 text-xs" />
+              <UserAvatar name={user.name} {...userPhotoProps(user)} className="size-7" />
               <span className="hidden text-sm sm:inline">{user.name}</span>
               <form action={logoutAction}>
                 <Button variant="ghost" size="icon-sm" type="submit" title="Sair">
