@@ -9,8 +9,8 @@ export const roomSchema = z.object({
   hostName: z.string().min(1, "Informe o nome do anfitrião."),
   password: z
     .string()
+    .nullable()
     .optional()
-    .or(z.literal(""))
     .transform((v) => (v ? v : null)),
   maxParticipants: z.coerce.number().int().min(2, "Mínimo de 2 participantes.").max(100, "Máximo de 100 participantes."),
   muteOnEntry: z.boolean(),
