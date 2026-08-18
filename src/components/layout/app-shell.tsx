@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { UserAvatar, userPhotoProps } from "@/components/shared/user-avatar";
 import { logoutAction } from "@/lib/actions/auth";
 import { getCurrentUser } from "@/lib/auth";
+import { PresenceHeartbeat } from "@/components/presence/presence-heartbeat";
+import { OnlineBar } from "@/components/presence/online-bar";
 
 export async function AppShell({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
@@ -48,6 +50,12 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
         </nav>
       </header>
       <main className="flex-1 p-4">{children}</main>
+      {user && (
+        <>
+          <PresenceHeartbeat />
+          <OnlineBar />
+        </>
+      )}
     </div>
   );
 }
