@@ -13,8 +13,9 @@ import {
   Image as ImageIcon,
   MessageCircle,
   FileText,
+  PenLine,
 } from "lucide-react";
-import { useTrackToggle, useDisconnectButton } from "@livekit/components-react";
+import { useTrackToggle, useDisconnectButton, useTracks } from "@livekit/components-react";
 import { cn } from "@/lib/utils";
 import { SoundboardPanel } from "./soundboard-panel";
 import { BackgroundSelectorPanel } from "./background-selector-panel";
@@ -55,13 +56,20 @@ export function CallControls({
   roomName,
   chatOpen,
   onToggleChat,
+  whiteboardActive,
+  onToggleWhiteboard,
 }: {
   allowScreenShare: boolean;
   currentUserId: string | null;
   roomName: string;
   chatOpen: boolean;
   onToggleChat: () => void;
+  whiteboardActive: boolean;
+  onToggleWhiteboard: () => void;
 }) {
+  const screenShareTracks = useTracks([{ source: Track.Source.ScreenShare, withPlaceholder: false }], {
+    onlySubscribed: false,
+  });
   const mic = useTrackToggle({ source: Track.Source.Microphone });
   const cam = useTrackToggle({ source: Track.Source.Camera });
   const screen = useTrackToggle({
@@ -143,6 +151,15 @@ export function CallControls({
           activeGradient="bg-gradient-to-br from-rose-500 to-pink-600"
           onClick={() => togglePanel("transcript")}
         />
+        {screenShareTracks.length > 0 && (
+          <ControlButton
+            active={whiteboardActive}
+            icon={<PenLine className="size-5" />}
+            label="Lousa"
+            activeGradient="bg-gradient-to-br from-lime-500 to-green-600"
+            onClick={onToggleWhiteboard}
+          />
+        )}
         <button
           type="button"
           {...disconnectProps}
