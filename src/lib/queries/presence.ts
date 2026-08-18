@@ -1,10 +1,9 @@
 import { prisma } from "@/lib/prisma";
 
-const ONLINE_WINDOW_MS = 60_000;
+export const ONLINE_WINDOW_MS = 60_000;
 
-export function getOnlineUsers() {
-  return prisma.user.findMany({
-    where: { lastSeenAt: { gte: new Date(Date.now() - ONLINE_WINDOW_MS) } },
+export async function getUsersWithPresence() {
+  const users = await prisma.user.findMany({
     select: {
       id: true,
       name: true,
@@ -13,7 +12,14 @@ export function getOnlineUsers() {
       photoPositionX: true,
       photoPositionY: true,
       photoZoom: true,
+      lastSeenAt: true,
     },
-    orderBy: { name: "asc" },
+    orderBy: [{ lastSeenAt: { sort: "desc", nulls: "last" } }, { name: "asc" }],
   });
+
+  const cutoff = Date.now() - ONLINE_WINDOW_MS;
+  return users.map((user) => ({
+    ...user,
+    online: Boolean(user.lastSeenAt && user.lastSeenAt.getTime() >= cutoff),
+  }));
 }

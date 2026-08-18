@@ -26,6 +26,18 @@ export function formatDateTime(date: Date | string) {
   }).format(new Date(date));
 }
 
+export function formatLastSeen(date: Date | string | null) {
+  if (!date) return "Nunca acessou";
+  const diffMs = Date.now() - new Date(date).getTime();
+  const diffMin = Math.floor(diffMs / 60_000);
+  if (diffMin < 1) return "Agora mesmo";
+  if (diffMin < 60) return `Visto há ${diffMin}min`;
+  const diffHours = Math.floor(diffMin / 60);
+  if (diffHours < 24) return `Visto há ${diffHours}h`;
+  const diffDays = Math.floor(diffHours / 24);
+  return `Visto há ${diffDays}d`;
+}
+
 export function formatDuration(totalSeconds: number) {
   if (totalSeconds < 60) return "menos de 1min";
   const hours = Math.floor(totalSeconds / 3600);
