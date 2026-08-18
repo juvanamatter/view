@@ -14,14 +14,22 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 
-export function LoginForm({ from }: { from?: string }) {
+export function LoginForm({
+  from,
+  logoUrl,
+  brandName,
+}: {
+  from?: string;
+  logoUrl: string;
+  brandName: string;
+}) {
   const [state, formAction, pending] = useActionState<LoginState, FormData>(loginAction, undefined);
 
   return (
     <Card className="glass-card w-full max-w-sm">
       <CardHeader>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/matter-logo.png" alt="Matter" className="mb-2 h-7 w-auto" />
+        <img src={logoUrl} alt={brandName} className="mb-2 h-7 w-auto" />
         <CardTitle>Entrar</CardTitle>
         <CardDescription>Acesse com o e-mail e senha cadastrados pelo administrador.</CardDescription>
       </CardHeader>

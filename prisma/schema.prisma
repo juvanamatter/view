@@ -16,6 +16,8 @@ datasource db {
 model AppSettings {
   id                      String   @id @default(cuid())
   brandName               String   @default("Reunião")
+  logoUrl                 String?
+  primaryColor            String   @default("#8b5cf6")
   defaultMaxParticipants  Int      @default(12)
   defaultMuteOnEntry      Boolean  @default(false)
   defaultCameraOnEntry    Boolean  @default(true)

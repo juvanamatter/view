@@ -13,7 +13,6 @@ import type { AppSettingsInput } from "@/lib/validators/app-settings";
 
 export function AppSettingsForm({ settings }: { settings: AppSettings }) {
   const [form, setForm] = useState<AppSettingsInput>({
-    brandName: settings.brandName,
     defaultMaxParticipants: settings.defaultMaxParticipants,
     defaultMuteOnEntry: settings.defaultMuteOnEntry,
     defaultCameraOnEntry: settings.defaultCameraOnEntry,
@@ -51,16 +50,6 @@ export function AppSettingsForm({ settings }: { settings: AppSettings }) {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="brandName">Nome exibido</Label>
-            <Input
-              id="brandName"
-              value={form.brandName}
-              onChange={(e) => update("brandName", e.target.value)}
-              required
-            />
-          </div>
-
           <div className="space-y-1.5">
             <Label htmlFor="defaultMaxParticipants">Máximo de participantes padrão</Label>
             <Input

@@ -2,7 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { appSettingsSchema, type AppSettingsInput } from "@/lib/validators/app-settings";
+import {
+  appSettingsSchema,
+  brandSettingsSchema,
+  type AppSettingsInput,
+  type BrandSettingsInput,
+} from "@/lib/validators/app-settings";
 import { requireAdmin } from "@/lib/auth";
 import { getAppSettings } from "@/lib/queries/app-settings";
 
@@ -16,5 +21,19 @@ export async function updateAppSettingsAction(input: AppSettingsInput) {
   const current = await getAppSettings();
   await prisma.appSettings.update({ where: { id: current.id }, data: parsed.data });
   revalidatePath("/configuracoes");
+  return { success: true } as const;
+}
+
+export async function updateBrandSettingsAction(input: BrandSettingsInput) {
+  await requireAdmin();
+  const parsed = brandSettingsSchema.safeParse(input);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Dados inválidos." } as const;
+  }
+
+  const current = await getAppSettings();
+  await prisma.appSettings.update({ where: { id: current.id }, data: parsed.data });
+  revalidatePath("/configuracoes");
+  revalidatePath("/", "layout");
   return { success: true } as const;
 }

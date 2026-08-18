@@ -6,9 +6,10 @@ import { logoutAction } from "@/lib/actions/auth";
 import { getCurrentUser } from "@/lib/auth";
 import { PresenceHeartbeat } from "@/components/presence/presence-heartbeat";
 import { OnlineBar } from "@/components/presence/online-bar";
+import { getAppSettings } from "@/lib/queries/app-settings";
 
 export async function AppShell({ children }: { children: React.ReactNode }) {
-  const user = await getCurrentUser();
+  const [user, settings] = await Promise.all([getCurrentUser(), getAppSettings()]);
   const isAdmin = user?.role === "ADMIN";
 
   return (
@@ -16,9 +17,9 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
       <header className="glass-panel mx-4 mt-4 flex items-center justify-between rounded-2xl px-4 py-3">
         <Link href="/" className="flex items-center gap-2.5">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/matter-logo.png" alt="Matter" className="h-6 w-auto" />
+          <img src={settings.logoUrl ?? "/matter-logo.png"} alt={settings.brandName} className="h-6 w-auto" />
           <span className="h-4 w-px bg-border" />
-          <span className="text-sm text-muted-foreground">Reunião</span>
+          <span className="text-sm text-muted-foreground">{settings.brandName}</span>
         </Link>
         <nav className="flex items-center gap-1">
           {isAdmin && (
