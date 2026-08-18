@@ -70,10 +70,7 @@ export default async function HomePage() {
                 className="animate-fade-in-up flex items-center gap-1.5 text-xs font-medium text-muted-foreground"
                 style={{ animationDelay: `${160 + i * 60}ms` }}
               >
-                <Icon
-                  className="animate-float size-3.5"
-                  style={{ color, animationDelay: `${i * 250}ms` }}
-                />
+                <Icon className="size-3.5" style={{ color }} />
                 {label}
               </span>
             ))}
