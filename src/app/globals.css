@@ -289,14 +289,20 @@
   border: 1px solid color-mix(in oklch, white 10%, transparent);
 }
 
-[data-lk-theme="reuniao"] .lk-participant-tile[data-has-photo="true"] .lk-participant-placeholder {
+[data-lk-theme="reuniao"] .lk-participant-tile[data-has-photo="true"] .lk-participant-placeholder svg {
+  display: none;
+}
+
+[data-lk-theme="reuniao"] .lk-participant-tile[data-has-photo="true"] .lk-participant-placeholder::before {
+  content: "";
+  display: block;
+  width: min(35%, 6rem);
+  aspect-ratio: 1;
+  border-radius: 9999px;
   background-image: var(--avatar-url);
   background-size: cover;
   background-position: var(--avatar-pos, center);
-}
-
-[data-lk-theme="reuniao"] .lk-participant-tile[data-has-photo="true"] .lk-participant-placeholder svg {
-  display: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
 }
 
 [data-lk-theme="reuniao"] .lk-participant-tile[data-hand-raised="true"]::after {

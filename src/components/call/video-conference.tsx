@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import {
   CarouselLayout,
   FocusLayout,
@@ -10,8 +11,10 @@ import {
 import { Track } from "livekit-client";
 import { WhiteboardOverlay } from "./whiteboard-overlay";
 import { ParticipantTileWithAvatar } from "./participant-tile-with-avatar";
+import { FullscreenButton } from "./fullscreen-button";
 
 export function VideoConference() {
+  const focusAreaRef = useRef<HTMLDivElement>(null);
   const tracks = useTracks(
     [
       { source: Track.Source.Camera, withPlaceholder: true },
@@ -36,9 +39,10 @@ export function VideoConference() {
         <CarouselLayout tracks={otherTracks}>
           <ParticipantTileWithAvatar />
         </CarouselLayout>
-        <div className="relative size-full">
+        <div ref={focusAreaRef} className="relative size-full">
           <FocusLayout trackRef={screenShareTrack} />
           <WhiteboardOverlay />
+          <FullscreenButton targetRef={focusAreaRef} />
         </div>
       </FocusLayoutContainer>
     );

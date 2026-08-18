@@ -3,25 +3,7 @@
 import { useEffect, useRef } from "react";
 import { Download, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useTranscription, type TranscriptEntry } from "./transcription-context";
-
-function downloadTranscript(entries: TranscriptEntry[], roomName: string) {
-  const header = `Transcrição — ${roomName}\nGerada em ${new Date().toLocaleString("pt-BR")}\n\n`;
-  const lines = entries.map((entry) => {
-    const time = new Date(entry.timestamp).toLocaleTimeString("pt-BR", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-    return `[${time}] ${entry.speaker}: ${entry.text}`;
-  });
-  const blob = new Blob([header + lines.join("\n")], { type: "text/plain;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `transcricao-${roomName}.txt`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
+import { useTranscription, downloadTranscript } from "./transcription-context";
 
 export function TranscriptionPanel({ roomName, onClose }: { roomName: string; onClose: () => void }) {
   const { entries, supported } = useTranscription();

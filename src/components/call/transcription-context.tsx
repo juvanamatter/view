@@ -20,6 +20,24 @@ function getSpeechRecognitionCtor(): typeof SpeechRecognition | undefined {
   return window.SpeechRecognition ?? window.webkitSpeechRecognition;
 }
 
+export function downloadTranscript(entries: TranscriptEntry[], roomName: string) {
+  const header = `Transcrição — ${roomName}\nGerada em ${new Date().toLocaleString("pt-BR")}\n\n`;
+  const lines = entries.map((entry) => {
+    const time = new Date(entry.timestamp).toLocaleTimeString("pt-BR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    return `[${time}] ${entry.speaker}: ${entry.text}`;
+  });
+  const blob = new Blob([header + lines.join("\n")], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `transcricao-${roomName}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 type TranscriptionContextValue = {
   entries: TranscriptEntry[];
   supported: boolean;
@@ -27,12 +45,22 @@ type TranscriptionContextValue = {
 
 const TranscriptionContext = createContext<TranscriptionContextValue | null>(null);
 
-export function TranscriptionProvider({ children }: { children: ReactNode }) {
+export function TranscriptionProvider({
+  children,
+  onEntriesChange,
+}: {
+  children: ReactNode;
+  onEntriesChange?: (entries: TranscriptEntry[]) => void;
+}) {
   const { localParticipant, isMicrophoneEnabled } = useLocalParticipant();
   const [entries, setEntries] = useState<TranscriptEntry[]>([]);
   const [supported] = useState(() => Boolean(getSpeechRecognitionCtor()));
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const shouldListenRef = useRef(false);
+
+  useEffect(() => {
+    onEntriesChange?.(entries);
+  }, [entries, onEntriesChange]);
 
   const { send } = useDataChannel("transcript", (msg) => {
     try {

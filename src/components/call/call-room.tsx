@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import "@livekit/components-styles";
 import { LiveKitRoom, RoomAudioRenderer } from "@livekit/components-react";
 import { AudioPresets, VideoPresets } from "livekit-client";
@@ -14,8 +14,9 @@ import { UsageTracker } from "./usage-tracker";
 import { SoundboardProvider } from "./soundboard-context";
 import { WhiteboardProvider } from "./whiteboard-context";
 import { WhiteboardRequestPanel } from "./whiteboard-request-panel";
-import { TranscriptionProvider } from "./transcription-context";
+import { TranscriptionProvider, type TranscriptEntry } from "./transcription-context";
 import { HandRaiseProvider } from "./hand-raise-context";
+import { CallEndedScreen } from "./call-ended-screen";
 
 export function CallRoom({
   session,
@@ -27,6 +28,25 @@ export function CallRoom({
   currentUserId: string | null;
 }) {
   const [chatOpen, setChatOpen] = useState(false);
+  const [ended, setEnded] = useState(false);
+  const [finalEntries, setFinalEntries] = useState<TranscriptEntry[]>([]);
+  const latestEntriesRef = useRef<TranscriptEntry[]>([]);
+
+  const handleEntriesChange = useCallback((entries: TranscriptEntry[]) => {
+    latestEntriesRef.current = entries;
+  }, []);
+
+  if (ended) {
+    return (
+      <CallEndedScreen
+        roomName={session.room.name}
+        entries={finalEntries}
+        onBack={() => {
+          window.location.href = "/";
+        }}
+      />
+    );
+  }
 
   return (
     <LiveKitRoom
@@ -54,12 +74,13 @@ export function CallRoom({
       className="app-gradient-bg flex flex-col"
       style={{ height: "100dvh" }}
       onDisconnected={() => {
-        window.location.href = "/";
+        setFinalEntries(latestEntriesRef.current);
+        setEnded(true);
       }}
     >
       <SoundboardProvider>
         <WhiteboardProvider>
-          <TranscriptionProvider>
+          <TranscriptionProvider onEntriesChange={handleEntriesChange}>
             <HandRaiseProvider>
               <WaitingGate>
                 <div className="flex min-h-0 flex-1">
