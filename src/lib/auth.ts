@@ -74,3 +74,11 @@ export async function requireAdmin() {
   }
   return session;
 }
+
+export function canManageRoom(
+  session: SessionPayload | null,
+  room: { createdByUserId: string | null }
+) {
+  if (!session) return false;
+  return session.role === "ADMIN" || session.sub === room.createdByUserId;
+}

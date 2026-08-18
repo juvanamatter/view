@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Track } from "livekit-client";
 import {
   Mic,
@@ -17,6 +18,7 @@ import {
   Users,
   Wind,
   Hand,
+  Circle,
 } from "lucide-react";
 import { useTrackToggle, useDisconnectButton, useParticipants } from "@livekit/components-react";
 import { useKrispNoiseFilter } from "@livekit/components-react/krisp";
@@ -28,6 +30,7 @@ import { TranscriptionPanel } from "./transcription-panel";
 import { ParticipantsPanel } from "./participants-panel";
 import { useWhiteboard } from "./whiteboard-context";
 import { useHandRaise } from "./hand-raise-context";
+import { useRecording } from "./recording-context";
 
 function ControlButton({
   active,
@@ -62,16 +65,22 @@ export function CallControls({
   allowScreenShare,
   currentUserId,
   roomName,
+  canManageRecording,
   chatOpen,
   onToggleChat,
 }: {
   allowScreenShare: boolean;
   currentUserId: string | null;
   roomName: string;
+  canManageRecording: boolean;
   chatOpen: boolean;
   onToggleChat: () => void;
 }) {
   const whiteboard = useWhiteboard();
+  const recording = useRecording();
+  useEffect(() => {
+    if (recording.error) toast.error(recording.error);
+  }, [recording.error]);
   const { localRaised, toggle: toggleHand } = useHandRaise();
   const mic = useTrackToggle({ source: Track.Source.Microphone });
   const cam = useTrackToggle({ source: Track.Source.Camera });
@@ -201,6 +210,16 @@ export function CallControls({
           activeGradient="bg-gradient-to-br from-yellow-400 to-amber-500"
           onClick={toggleHand}
         />
+        {canManageRecording && (
+          <ControlButton
+            active={recording.active}
+            disabled={recording.pending}
+            icon={<Circle className={cn("size-5", recording.active && "fill-current")} />}
+            label={recording.active ? "Parar gravação" : "Gravar"}
+            activeGradient="bg-gradient-to-br from-red-600 to-rose-700"
+            onClick={recording.active ? recording.stop : recording.start}
+          />
+        )}
         <button
           type="button"
           {...disconnectProps}
