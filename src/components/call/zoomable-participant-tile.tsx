@@ -17,7 +17,7 @@ export function ZoomableParticipantTile(props: ParticipantTileProps) {
   }
 
   return (
-    <div className="group relative overflow-hidden" style={{ borderRadius: "var(--lk-border-radius)" }}>
+    <div className="lk-tile-frame group relative overflow-hidden" style={{ borderRadius: "var(--lk-border-radius)" }}>
       <div className="size-full transition-transform duration-200" style={{ transform: `scale(${zoom})` }}>
         <ParticipantTileWithAvatar {...props} />
       </div>

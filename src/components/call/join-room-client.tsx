@@ -34,10 +34,8 @@ export function JoinRoomClient({
         session={joined.session}
         canAdmit={canAdmit}
         currentUserId={currentUser?.id ?? null}
-        initialCameraOn={joined.choices.cameraOn}
-        initialMicOn={joined.choices.micOn}
-        cameraDeviceId={joined.choices.cameraDeviceId}
-        micDeviceId={joined.choices.micDeviceId}
+        videoTrack={joined.choices.videoTrack}
+        audioTrack={joined.choices.audioTrack}
       />
     );
   }

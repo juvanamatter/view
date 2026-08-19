@@ -19,6 +19,8 @@ export const roomSchema = z.object({
   waitingRoom: z.boolean(),
   isActive: z.boolean(),
   isTeamRoom: z.boolean(),
+  isSecret: z.boolean(),
+  invitedUserIds: z.array(z.string()),
 });
 
 export type RoomInput = z.infer<typeof roomSchema>;

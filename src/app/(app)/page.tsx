@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Plus, Video } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
-import { getRecentRoomVisits, getUpcomingScheduledRooms } from "@/lib/queries/rooms";
+import { getRecentRoomVisits, getUpcomingScheduledRooms, getDiscoverableRooms } from "@/lib/queries/rooms";
 import { getAppSettings } from "@/lib/queries/app-settings";
 import { createInstantRoomAction } from "@/lib/actions/rooms";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { TimeGreeting } from "@/components/home/time-greeting";
 import { ScheduleMeetingButton } from "@/components/home/schedule-meeting-dialog";
 import { LiveStatusProvider } from "@/components/home/live-status-context";
 import { LiveBadge } from "@/components/home/live-badge";
+import { OngoingMeetings } from "@/components/home/ongoing-meetings";
 import { formatLastSeen, formatScheduled } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -26,9 +27,10 @@ export default async function HomePage() {
   const user = await getCurrentUser();
   if (!user) return null;
 
-  const [recentVisits, scheduledRooms, settings] = await Promise.all([
+  const [recentVisits, scheduledRooms, discoverableRooms, settings] = await Promise.all([
     getRecentRoomVisits(user.id),
     getUpcomingScheduledRooms(user.id),
+    getDiscoverableRooms(user.id),
     getAppSettings(),
   ]);
 
@@ -77,6 +79,10 @@ export default async function HomePage() {
           </div>
         </div>
       </div>
+
+      <OngoingMeetings
+        candidates={discoverableRooms.map((r) => ({ id: r.id, name: r.name, slug: r.slug }))}
+      />
 
       <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
         <section className="space-y-3">

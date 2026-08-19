@@ -15,10 +15,19 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { InviteUserPicker } from "@/components/shared/invite-user-picker";
 import { createScheduledRoomAction } from "@/lib/actions/rooms";
 
 function defaultDate() {
-  return new Date().toISOString().slice(0, 10);
+  // Local date parts, not toISOString() (UTC) — near timezone boundaries
+  // (e.g. Brazil at night, UTC already on the next day) that would default
+  // the picker to tomorrow instead of today.
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
 }
 
 function ScheduleMeetingBody({ onDone }: { onDone: () => void }) {
@@ -26,6 +35,8 @@ function ScheduleMeetingBody({ onDone }: { onDone: () => void }) {
   const [name, setName] = useState("");
   const [date, setDate] = useState(defaultDate);
   const [time, setTime] = useState("09:00");
+  const [isSecret, setIsSecret] = useState(false);
+  const [invitedUserIds, setInvitedUserIds] = useState<string[]>([]);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,6 +47,8 @@ function ScheduleMeetingBody({ onDone }: { onDone: () => void }) {
     const result = await createScheduledRoomAction({
       name,
       scheduledAt: new Date(`${date}T${time}`).toISOString(),
+      isSecret,
+      invitedUserIds,
     });
     setPending(false);
     if ("error" in result && result.error) {
@@ -81,6 +94,20 @@ function ScheduleMeetingBody({ onDone }: { onDone: () => void }) {
           />
         </div>
       </div>
+
+      <div className="space-y-3 rounded-lg border border-border p-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium">Reunião secreta</p>
+            <p className="text-xs text-muted-foreground">
+              Não aparece em &quot;Acontecendo agora&quot; — só quem for convidado abaixo enxerga.
+            </p>
+          </div>
+          <Switch checked={isSecret} onCheckedChange={setIsSecret} />
+        </div>
+        {isSecret && <InviteUserPicker selected={invitedUserIds} onChange={setInvitedUserIds} />}
+      </div>
+
       {error && <p className="text-sm text-destructive">{error}</p>}
       <DialogFooter>
         <Button type="submit" disabled={pending}>
