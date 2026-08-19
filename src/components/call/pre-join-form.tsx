@@ -281,12 +281,11 @@ export function PreJoinForm({
   roomName: string;
   hasPassword: boolean;
   waitingRoom: boolean;
-  accountName: string | null;
+  accountName: string;
   defaultCameraOn: boolean;
   defaultMicOn: boolean;
   onJoined: (session: CallSession, choices: JoinChoices) => void;
 }) {
-  const [name, setName] = useState(accountName ?? "");
   const [password, setPassword] = useState("");
   const [cameraOn, setCameraOn] = useState(defaultCameraOn);
   const [micOn, setMicOn] = useState(defaultMicOn);
@@ -358,7 +357,7 @@ export function PreJoinForm({
       const res = await fetch("/api/token", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slug, participantName: name, password }),
+        body: JSON.stringify({ slug, password }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -396,7 +395,7 @@ export function PreJoinForm({
             audioTrack={audioTrack}
             background={background}
             setBackground={setBackground}
-            name={name}
+            name={accountName}
           />
 
           <form onSubmit={handleSubmit} className="glass-card flex flex-col gap-4 p-5">
@@ -409,29 +408,6 @@ export function PreJoinForm({
               </p>
             </div>
 
-            {!accountName && (
-              <div className="space-y-1.5">
-                <Label htmlFor="name">Seu nome</Label>
-                <Input
-                  id="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Como você quer aparecer"
-                  required
-                  autoFocus
-                />
-                <p className="text-xs text-muted-foreground">
-                  Já tem uma conta?{" "}
-                  <Link
-                    href={`/entrar?from=${encodeURIComponent(`/sala/${slug}`)}`}
-                    className="underline hover:text-foreground"
-                  >
-                    Entrar
-                  </Link>{" "}
-                  pra aparecer com seu nome e foto.
-                </p>
-              </div>
-            )}
             {hasPassword && (
               <div className="space-y-1.5">
                 <Label htmlFor="password">Senha da sala</Label>
@@ -441,7 +417,7 @@ export function PreJoinForm({
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  autoFocus={Boolean(accountName)}
+                  autoFocus
                 />
               </div>
             )}

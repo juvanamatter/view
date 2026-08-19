@@ -63,6 +63,9 @@ export async function updateUserAction(id: string, input: UserInput): Promise<Us
       role: parsed.data.role,
       jobTitle: parsed.data.jobTitle,
       photoUrl: parsed.data.photoUrl,
+      photoPositionX: parsed.data.photoPositionX,
+      photoPositionY: parsed.data.photoPositionY,
+      photoZoom: parsed.data.photoZoom,
       ...(parsed.data.password ? { passwordHash: await bcrypt.hash(parsed.data.password, 10) } : {}),
     },
   });

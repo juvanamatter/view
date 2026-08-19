@@ -6,6 +6,11 @@ import { mintParticipantToken, countActiveParticipants, getLiveKitUrl } from "@/
 import { getCurrentUser } from "@/lib/auth";
 
 export async function POST(request: Request) {
+  const user = await getCurrentUser();
+  if (!user) {
+    return NextResponse.json({ error: "Você precisa entrar com sua conta." }, { status: 401 });
+  }
+
   const body = await request.json().catch(() => null);
   const parsed = joinSchema.safeParse(body);
   if (!parsed.success) {
@@ -14,7 +19,7 @@ export async function POST(request: Request) {
       { status: 400 }
     );
   }
-  const { slug, participantName, password } = parsed.data;
+  const { slug, password } = parsed.data;
 
   const room = await prisma.room.findUnique({ where: { slug } });
   if (!room || !room.isActive) {
@@ -24,20 +29,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Senha incorreta." }, { status: 401 });
   }
 
-  const [participantCount, user] = await Promise.all([
-    countActiveParticipants(room.slug),
-    getCurrentUser(),
-  ]);
+  const participantCount = await countActiveParticipants(room.slug);
   if (participantCount >= room.maxParticipants) {
     return NextResponse.json({ error: "Esta sala já está cheia." }, { status: 409 });
   }
 
-  const identity = `${participantName.trim().slice(0, 40)}-${Math.random().toString(36).slice(2, 8)}`;
+  const identity = `${user.name.trim().slice(0, 40)}-${Math.random().toString(36).slice(2, 8)}`;
   const waiting = room.waitingRoom;
 
-  if (user) {
-    after(() => prisma.roomVisit.create({ data: { userId: user.id, roomId: room.id } }).catch(() => {}));
-  }
+  after(() => prisma.roomVisit.create({ data: { userId: user.id, roomId: room.id } }).catch(() => {}));
 
   const canPublishSources = room.allowScreenShare
     ? [TrackSource.CAMERA, TrackSource.MICROPHONE, TrackSource.SCREEN_SHARE, TrackSource.SCREEN_SHARE_AUDIO]
@@ -46,10 +46,10 @@ export async function POST(request: Request) {
   const token = await mintParticipantToken({
     roomName: room.slug,
     identity,
-    participantName: participantName.trim(),
+    participantName: user.name,
     metadata: JSON.stringify({
       waiting,
-      ...(user?.photoUrl
+      ...(user.photoUrl
         ? {
             photoUrl: user.photoUrl,
             photoPositionX: user.photoPositionX,
