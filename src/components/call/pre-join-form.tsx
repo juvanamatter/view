@@ -24,10 +24,8 @@ import {
 import type { CallSession } from "@/lib/call-types";
 
 export type JoinChoices = {
-  cameraOn: boolean;
-  micOn: boolean;
-  cameraDeviceId?: string;
-  micDeviceId?: string;
+  videoTrack: LocalVideoTrack | null;
+  audioTrack: LocalAudioTrack | null;
 };
 
 type BackgroundImage = { id: string; name: string; imageUrl: string };
@@ -73,6 +71,8 @@ function DevicePreview({
   micDeviceId,
   setCameraDeviceId,
   setMicDeviceId,
+  videoTrack,
+  audioTrack,
   background,
   setBackground,
   name,
@@ -85,13 +85,13 @@ function DevicePreview({
   micDeviceId: string | undefined;
   setCameraDeviceId: (id: string) => void;
   setMicDeviceId: (id: string) => void;
+  videoTrack: LocalVideoTrack | null;
+  audioTrack: LocalAudioTrack | null;
   background: BackgroundSelection;
   setBackground: (b: BackgroundSelection) => void;
   name: string;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [videoTrack, setVideoTrack] = useState<LocalVideoTrack | null>(null);
-  const [audioTrack, setAudioTrack] = useState<LocalAudioTrack | null>(null);
   const [images, setImages] = useState<BackgroundImage[]>([]);
   const processorRef = useRef<BackgroundProcessorWrapper | null>(null);
   const cameras = useMediaDevices({ kind: "videoinput" });
@@ -105,31 +105,6 @@ function DevicePreview({
       .catch(() => {});
   }, []);
 
-  useEffect(() => {
-    if (!cameraOn) return;
-    let cancelled = false;
-    let track: LocalVideoTrack | null = null;
-
-    createLocalVideoTrack({ deviceId: cameraDeviceId })
-      .then((t) => {
-        if (cancelled) {
-          t.stop();
-          return;
-        }
-        track = t;
-        setVideoTrack(t);
-      })
-      .catch(() => {});
-
-    return () => {
-      cancelled = true;
-      track?.stop();
-      processorRef.current = null;
-    };
-  }, [cameraOn, cameraDeviceId]);
-
-  // Attach the preview track to the <video> element whenever either becomes ready —
-  // the element is always mounted, so this never races the track's own load promise.
   useEffect(() => {
     const el = videoRef.current;
     if (!el || !videoTrack) return;
@@ -166,28 +141,6 @@ function DevicePreview({
     }
     apply();
   }, [videoTrack, background]);
-
-  useEffect(() => {
-    if (!micOn) return;
-    let cancelled = false;
-    let track: LocalAudioTrack | null = null;
-
-    createLocalAudioTrack({ deviceId: micDeviceId })
-      .then((t) => {
-        if (cancelled) {
-          t.stop();
-          return;
-        }
-        track = t;
-        setAudioTrack(t);
-      })
-      .catch(() => {});
-
-    return () => {
-      cancelled = true;
-      track?.stop();
-    };
-  }, [micOn, micDeviceId]);
 
   function chooseBackground(next: BackgroundSelection) {
     setBackground(next);
@@ -339,9 +292,63 @@ export function PreJoinForm({
   const [micOn, setMicOn] = useState(defaultMicOn);
   const [cameraDeviceId, setCameraDeviceId] = useState<string>();
   const [micDeviceId, setMicDeviceId] = useState<string>();
+  const [videoTrack, setVideoTrack] = useState<LocalVideoTrack | null>(null);
+  const [audioTrack, setAudioTrack] = useState<LocalAudioTrack | null>(null);
   const [background, setBackground] = useState<BackgroundSelection>(() => loadBackgroundSelection());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const handedOffRef = useRef(false);
+
+  // Created once here (not re-derived when actually joining), then handed off to the
+  // LiveKit connection as-is — publishing the same track avoids a second getUserMedia()
+  // call, which was the source of the unreliable "mic doesn't work" reports on join.
+  useEffect(() => {
+    if (!cameraOn) return;
+    let cancelled = false;
+    let track: LocalVideoTrack | null = null;
+
+    createLocalVideoTrack({ deviceId: cameraDeviceId })
+      .then((t) => {
+        if (cancelled) {
+          t.stop();
+          return;
+        }
+        track = t;
+        setVideoTrack(t);
+      })
+      .catch(() => {
+        toast.error("Não foi possível acessar a câmera. Verifique as permissões do navegador.");
+      });
+
+    return () => {
+      cancelled = true;
+      if (!handedOffRef.current) track?.stop();
+    };
+  }, [cameraOn, cameraDeviceId]);
+
+  useEffect(() => {
+    if (!micOn) return;
+    let cancelled = false;
+    let track: LocalAudioTrack | null = null;
+
+    createLocalAudioTrack({ deviceId: micDeviceId })
+      .then((t) => {
+        if (cancelled) {
+          t.stop();
+          return;
+        }
+        track = t;
+        setAudioTrack(t);
+      })
+      .catch(() => {
+        toast.error("Não foi possível acessar o microfone. Verifique as permissões do navegador.");
+      });
+
+    return () => {
+      cancelled = true;
+      if (!handedOffRef.current) track?.stop();
+    };
+  }, [micOn, micDeviceId]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -358,7 +365,8 @@ export function PreJoinForm({
         setError(data.error ?? "Não foi possível entrar na sala.");
         return;
       }
-      onJoined(data as CallSession, { cameraOn, micOn, cameraDeviceId, micDeviceId });
+      handedOffRef.current = true;
+      onJoined(data as CallSession, { videoTrack, audioTrack });
     } catch {
       setError("Erro de conexão. Tente novamente.");
     } finally {
@@ -384,6 +392,8 @@ export function PreJoinForm({
             micDeviceId={micDeviceId}
             setCameraDeviceId={setCameraDeviceId}
             setMicDeviceId={setMicDeviceId}
+            videoTrack={videoTrack}
+            audioTrack={audioTrack}
             background={background}
             setBackground={setBackground}
             name={name}

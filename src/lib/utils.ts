@@ -38,17 +38,38 @@ export function formatLastSeen(date: Date | string | null) {
   return `Visto há ${diffDays}d`;
 }
 
+const SCHEDULE_TZ = "America/Sao_Paulo";
+
 export function formatScheduled(date: Date | string) {
   const target = new Date(date);
   const now = new Date();
-  const time = new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit" }).format(target);
+  const time = new Intl.DateTimeFormat("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: SCHEDULE_TZ,
+  }).format(target);
 
-  const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
-  const diffDays = Math.round((startOfDay(target) - startOfDay(now)) / 86_400_000);
+  // Compares calendar dates in Brazil's timezone specifically — this runs
+  // server-side too, where the runtime's own local timezone is UTC, so
+  // relying on Date's local getters here would misjudge "hoje"/"amanhã" by
+  // hours depending on the time of day.
+  const dayKey = (d: Date) =>
+    new Intl.DateTimeFormat("en-CA", {
+      timeZone: SCHEDULE_TZ,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(d);
 
-  if (diffDays === 0) return `Hoje às ${time}`;
-  if (diffDays === 1) return `Amanhã às ${time}`;
-  const day = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short" }).format(target);
+  const tomorrow = new Date(now.getTime() + 86_400_000);
+
+  if (dayKey(target) === dayKey(now)) return `Hoje às ${time}`;
+  if (dayKey(target) === dayKey(tomorrow)) return `Amanhã às ${time}`;
+  const day = new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "short",
+    timeZone: SCHEDULE_TZ,
+  }).format(target);
   return `${day} às ${time}`;
 }
 

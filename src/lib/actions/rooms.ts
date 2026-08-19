@@ -82,6 +82,8 @@ export async function createInstantRoomAction() {
 export async function createScheduledRoomAction(input: {
   name: string;
   scheduledAt: string;
+  isSecret?: boolean;
+  invitedUserIds?: string[];
 }): Promise<RoomActionResult> {
   const session = await getSession();
   if (!session) return { error: "Não autorizado." };
@@ -108,6 +110,8 @@ export async function createScheduledRoomAction(input: {
       allowScreenShare: settings.defaultAllowScreenShare,
       waitingRoom: settings.defaultWaitingRoom,
       scheduledAt,
+      isSecret: input.isSecret ?? false,
+      invitedUserIds: input.invitedUserIds ?? [],
       createdByUserId: user.id,
     },
   });

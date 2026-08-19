@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { InviteUserPicker } from "@/components/shared/invite-user-picker";
 import { createRoomAction, updateRoomAction } from "@/lib/actions/rooms";
 import { slugify } from "@/lib/utils";
 import type { RoomInput } from "@/lib/validators/room";
@@ -40,6 +41,8 @@ function buildInitialForm(room: Room | undefined, defaults: RoomDefaults): RoomI
     waitingRoom: room?.waitingRoom ?? defaults.waitingRoom,
     isActive: room?.isActive ?? true,
     isTeamRoom: room?.isTeamRoom ?? false,
+    isSecret: room?.isSecret ?? false,
+    invitedUserIds: room?.invitedUserIds ?? [],
   };
 }
 
@@ -175,6 +178,24 @@ function RoomForm({
           </p>
         </div>
         <Switch checked={form.isTeamRoom} onCheckedChange={(v) => update("isTeamRoom", v)} />
+      </div>
+
+      <div className="space-y-3 rounded-lg border border-border p-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium">Reunião secreta</p>
+            <p className="text-xs text-muted-foreground">
+              Não aparece em &quot;Acontecendo agora&quot; — só quem for convidado abaixo enxerga.
+            </p>
+          </div>
+          <Switch checked={form.isSecret} onCheckedChange={(v) => update("isSecret", v)} />
+        </div>
+        {form.isSecret && (
+          <InviteUserPicker
+            selected={form.invitedUserIds}
+            onChange={(ids) => update("invitedUserIds", ids)}
+          />
+        )}
       </div>
 
       <div className="flex items-center justify-between rounded-lg border border-border p-3">

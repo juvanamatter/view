@@ -26,6 +26,17 @@ export function getTeamRooms() {
   });
 }
 
+export function getDiscoverableRooms(userId: string) {
+  return prisma.room.findMany({
+    where: {
+      isActive: true,
+      isInstant: false,
+      OR: [{ isSecret: false }, { createdByUserId: userId }, { invitedUserIds: { has: userId } }],
+    },
+    orderBy: { name: "asc" },
+  });
+}
+
 export function getUpcomingScheduledRooms(userId: string, limit = 5) {
   return prisma.room.findMany({
     where: { createdByUserId: userId, scheduledAt: { gte: new Date() } },

@@ -8,6 +8,16 @@ import { ZoomableParticipantTile } from "./zoomable-participant-tile";
 import { ZoomableScreenShare } from "./zoomable-screen-share";
 import { FullscreenButton } from "./fullscreen-button";
 
+type TrackItem = ReturnType<typeof useTracks>[number];
+
+function isCameraOn(t: TrackItem) {
+  return t.source === Track.Source.Camera && Boolean(t.publication) && !t.publication?.isMuted;
+}
+
+function withCameraOnFirst(items: TrackItem[]) {
+  return [...items].sort((a, b) => Number(isCameraOn(b)) - Number(isCameraOn(a)));
+}
+
 export function VideoConference() {
   const focusAreaRef = useRef<HTMLDivElement>(null);
   const tracks = useTracks(
@@ -21,12 +31,14 @@ export function VideoConference() {
   const screenShareTrack = tracks.find((t) => t.source === Track.Source.ScreenShare);
 
   if (screenShareTrack) {
-    const otherTracks = tracks.filter(
-      (t) =>
-        !(
-          t.participant.identity === screenShareTrack.participant.identity &&
-          t.source === screenShareTrack.source
-        )
+    const otherTracks = withCameraOnFirst(
+      tracks.filter(
+        (t) =>
+          !(
+            t.participant.identity === screenShareTrack.participant.identity &&
+            t.source === screenShareTrack.source
+          )
+      )
     );
 
     return (
@@ -48,7 +60,7 @@ export function VideoConference() {
   }
 
   return (
-    <GridLayout tracks={tracks} style={{ height: "100%" }}>
+    <GridLayout tracks={withCameraOnFirst(tracks)} style={{ height: "100%" }}>
       <ZoomableParticipantTile />
     </GridLayout>
   );

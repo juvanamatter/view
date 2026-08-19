@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import "@livekit/components-styles";
-import { LiveKitRoom, RoomAudioRenderer } from "@livekit/components-react";
-import { AudioPresets, ScreenSharePresets, VideoPresets } from "livekit-client";
+import { LiveKitRoom, RoomAudioRenderer, useRoomContext } from "@livekit/components-react";
+import { AudioPresets, ScreenSharePresets, VideoPresets, type LocalAudioTrack, type LocalVideoTrack } from "livekit-client";
 import type { CallSession } from "@/lib/call-types";
 import { WaitingGate } from "./waiting-gate";
 import { CallHeader } from "./call-header";
@@ -12,7 +12,6 @@ import { CallControls } from "./call-controls";
 import { ChatPanel } from "./chat-panel";
 import { HostWaitingPanel } from "./host-waiting-panel";
 import { UsageTracker } from "./usage-tracker";
-import { PresenceHeartbeat } from "@/components/presence/presence-heartbeat";
 import { SoundboardProvider } from "./soundboard-context";
 import { BackgroundProvider } from "./background-context";
 import { WhiteboardProvider } from "./whiteboard-context";
@@ -20,26 +19,44 @@ import { WhiteboardRequestPanel } from "./whiteboard-request-panel";
 import { TranscriptionProvider, type TranscriptEntry } from "./transcription-context";
 import { HandRaiseProvider } from "./hand-raise-context";
 import { CallEndedScreen } from "./call-ended-screen";
+import { PresenceHeartbeat } from "@/components/presence/presence-heartbeat";
+
+function PublishHandedOffTracks({
+  videoTrack,
+  audioTrack,
+}: {
+  videoTrack: LocalVideoTrack | null;
+  audioTrack: LocalAudioTrack | null;
+}) {
+  const room = useRoomContext();
+
+  // Runs once: this component only ever mounts a single time, right after the
+  // room connects, specifically to publish the tracks handed off from the lobby.
+  useEffect(() => {
+    if (videoTrack) room.localParticipant.publishTrack(videoTrack).catch(() => {});
+    if (audioTrack) room.localParticipant.publishTrack(audioTrack).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return null;
+}
 
 export function CallRoom({
   session,
   canAdmit,
   currentUserId,
-  initialCameraOn,
-  initialMicOn,
-  cameraDeviceId,
-  micDeviceId,
+  videoTrack,
+  audioTrack,
 }: {
   session: CallSession;
   canAdmit: boolean;
   currentUserId: string | null;
-  initialCameraOn: boolean;
-  initialMicOn: boolean;
-  cameraDeviceId?: string;
-  micDeviceId?: string;
+  videoTrack: LocalVideoTrack | null;
+  audioTrack: LocalAudioTrack | null;
 }) {
   const [chatOpen, setChatOpen] = useState(false);
   const [ended, setEnded] = useState(false);
+  const [connected, setConnected] = useState(false);
   const [finalEntries, setFinalEntries] = useState<TranscriptEntry[]>([]);
   const latestEntriesRef = useRef<TranscriptEntry[]>([]);
 
@@ -63,12 +80,8 @@ export function CallRoom({
     <LiveKitRoom
       token={session.token}
       serverUrl={session.livekitUrl}
-      video={initialCameraOn ? { resolution: VideoPresets.h720.resolution, deviceId: cameraDeviceId } : false}
-      audio={
-        initialMicOn
-          ? { echoCancellation: true, noiseSuppression: true, autoGainControl: true, deviceId: micDeviceId }
-          : false
-      }
+      video={false}
+      audio={false}
       options={{
         adaptiveStream: true,
         dynacast: true,
@@ -86,11 +99,13 @@ export function CallRoom({
       data-lk-theme="reuniao"
       className="app-gradient-bg flex flex-col"
       style={{ height: "100dvh" }}
+      onConnected={() => setConnected(true)}
       onDisconnected={() => {
         setFinalEntries(latestEntriesRef.current);
         setEnded(true);
       }}
     >
+      {connected && <PublishHandedOffTracks videoTrack={videoTrack} audioTrack={audioTrack} />}
       <SoundboardProvider>
         <BackgroundProvider>
           <WhiteboardProvider>
