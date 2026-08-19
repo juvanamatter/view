@@ -1,13 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import {
-  CarouselLayout,
-  FocusLayout,
-  FocusLayoutContainer,
-  GridLayout,
-  useTracks,
-} from "@livekit/components-react";
+import { CarouselLayout, FocusLayout, GridLayout, useTracks } from "@livekit/components-react";
 import { Track } from "livekit-client";
 import { WhiteboardOverlay } from "./whiteboard-overlay";
 import { ParticipantTileWithAvatar } from "./participant-tile-with-avatar";
@@ -35,16 +29,20 @@ export function VideoConference() {
     );
 
     return (
-      <FocusLayoutContainer style={{ height: "100%" }}>
-        <CarouselLayout tracks={otherTracks}>
-          <ParticipantTileWithAvatar />
-        </CarouselLayout>
-        <div ref={focusAreaRef} className="relative size-full">
+      <div className="flex size-full flex-col gap-2">
+        <div ref={focusAreaRef} className="relative min-h-0 flex-1">
           <FocusLayout trackRef={screenShareTrack} />
           <WhiteboardOverlay />
           <FullscreenButton targetRef={focusAreaRef} />
         </div>
-      </FocusLayoutContainer>
+        {otherTracks.length > 0 && (
+          <div className="h-28 shrink-0">
+            <CarouselLayout tracks={otherTracks} orientation="horizontal" style={{ height: "100%" }}>
+              <ParticipantTileWithAvatar />
+            </CarouselLayout>
+          </div>
+        )}
+      </div>
     );
   }
 
