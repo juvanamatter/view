@@ -1,17 +1,14 @@
 import Link from "next/link";
 import { Video } from "lucide-react";
 import { getTeamRooms } from "@/lib/queries/rooms";
-import { countActiveParticipants } from "@/lib/livekit";
 import { Button } from "@/components/ui/button";
+import { LiveStatusProvider } from "@/components/home/live-status-context";
+import { LiveBadge } from "@/components/home/live-badge";
 
 export const dynamic = "force-dynamic";
 
 export default async function EquipesPage() {
   const rooms = await getTeamRooms();
-  const liveCounts = await Promise.all(
-    rooms.map(async (room) => [room.slug, await countActiveParticipants(room.slug)] as const)
-  );
-  const liveBySlug = new Map(liveCounts);
 
   return (
     <div className="mx-auto max-w-3xl space-y-5">
@@ -28,10 +25,9 @@ export default async function EquipesPage() {
           &quot;Sala de equipe&quot; em Salas.
         </div>
       ) : (
-        <div className="glass-card divide-y divide-border">
-          {rooms.map((room) => {
-            const isLive = (liveBySlug.get(room.slug) ?? 0) > 0;
-            return (
+        <LiveStatusProvider slugs={rooms.map((room) => room.slug)}>
+          <div className="glass-card divide-y divide-border">
+            {rooms.map((room) => (
               <div key={room.id} className="flex items-center gap-3 p-3">
                 <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-fuchsia-500 to-purple-600">
                   <Video className="size-4 text-white" />
@@ -39,27 +35,19 @@ export default async function EquipesPage() {
                 <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
                   <span className="flex items-center gap-2 truncate font-medium">
                     {room.name}
-                    {isLive && (
-                      <span className="shrink-0 rounded-full bg-fuchsia-500 px-2 py-0.5 text-[10px] font-semibold text-white">
-                        Ao vivo
-                      </span>
-                    )}
+                    <LiveBadge slug={room.slug} color="#d946ef" />
                   </span>
                   <span className="truncate text-xs text-muted-foreground">
                     até {room.maxParticipants} participantes
                   </span>
                 </div>
-                <Button
-                  size="sm"
-                  className={isLive ? "bg-gradient-to-br from-fuchsia-500 to-purple-600" : undefined}
-                  render={<Link href={`/sala/${room.slug}`} />}
-                >
+                <Button size="sm" render={<Link href={`/sala/${room.slug}`} />}>
                   Entrar
                 </Button>
               </div>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        </LiveStatusProvider>
       )}
     </div>
   );

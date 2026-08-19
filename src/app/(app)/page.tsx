@@ -4,11 +4,12 @@ import { getCurrentUser } from "@/lib/auth";
 import { getRecentRoomVisits, getUpcomingScheduledRooms } from "@/lib/queries/rooms";
 import { getAppSettings } from "@/lib/queries/app-settings";
 import { createInstantRoomAction } from "@/lib/actions/rooms";
-import { countActiveParticipants } from "@/lib/livekit";
 import { Button } from "@/components/ui/button";
 import { JoinByCodeForm } from "@/components/home/join-by-code-form";
 import { TimeGreeting } from "@/components/home/time-greeting";
 import { ScheduleMeetingButton } from "@/components/home/schedule-meeting-dialog";
+import { LiveStatusProvider } from "@/components/home/live-status-context";
+import { LiveBadge } from "@/components/home/live-badge";
 import { formatLastSeen, formatScheduled } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -30,11 +31,6 @@ export default async function HomePage() {
     getUpcomingScheduledRooms(user.id),
     getAppSettings(),
   ]);
-
-  const liveCounts = await Promise.all(
-    recentVisits.map(async ({ room }) => [room.slug, await countActiveParticipants(room.slug)] as const)
-  );
-  const liveBySlug = new Map(liveCounts);
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -90,39 +86,27 @@ export default async function HomePage() {
               Você ainda não participou de nenhuma reunião.
             </div>
           ) : (
-            <div className="glass-card divide-y divide-border">
-              {recentVisits.map(({ room, joinedAt }) => {
-                const isLive = (liveBySlug.get(room.slug) ?? 0) > 0;
-                return (
+            <LiveStatusProvider slugs={recentVisits.map(({ room }) => room.slug)}>
+              <div className="glass-card divide-y divide-border">
+                {recentVisits.map(({ room, joinedAt }) => (
                   <div key={room.id} className="flex items-center gap-3 p-3">
                     <RoomIcon />
                     <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
                       <span className="flex items-center gap-2 truncate font-medium">
                         {room.name}
-                        {isLive && (
-                          <span
-                            className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold text-white"
-                            style={{ background: settings.primaryColor }}
-                          >
-                            Ao vivo
-                          </span>
-                        )}
+                        <LiveBadge slug={room.slug} color={settings.primaryColor} />
                       </span>
                       <span className="truncate text-xs text-muted-foreground">
                         {formatLastSeen(joinedAt)} · {room.hostName}
                       </span>
                     </div>
-                    <Button
-                      size="sm"
-                      className={isLive ? "bg-gradient-to-br from-fuchsia-500 to-purple-600" : undefined}
-                      render={<Link href={`/sala/${room.slug}`} />}
-                    >
+                    <Button size="sm" render={<Link href={`/sala/${room.slug}`} />}>
                       Entrar
                     </Button>
                   </div>
-                );
-              })}
-            </div>
+                ))}
+              </div>
+            </LiveStatusProvider>
           )}
         </section>
 

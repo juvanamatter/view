@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { TrackSource } from "livekit-server-sdk";
 import { prisma } from "@/lib/prisma";
 import { joinSchema } from "@/lib/validators/join";
@@ -24,17 +24,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Senha incorreta." }, { status: 401 });
   }
 
-  const participantCount = await countActiveParticipants(room.slug);
+  const [participantCount, user] = await Promise.all([
+    countActiveParticipants(room.slug),
+    getCurrentUser(),
+  ]);
   if (participantCount >= room.maxParticipants) {
     return NextResponse.json({ error: "Esta sala já está cheia." }, { status: 409 });
   }
 
   const identity = `${participantName.trim().slice(0, 40)}-${Math.random().toString(36).slice(2, 8)}`;
   const waiting = room.waitingRoom;
-  const user = await getCurrentUser();
 
   if (user) {
-    await prisma.roomVisit.create({ data: { userId: user.id, roomId: room.id } }).catch(() => {});
+    after(() => prisma.roomVisit.create({ data: { userId: user.id, roomId: room.id } }).catch(() => {}));
   }
 
   const canPublishSources = room.allowScreenShare
