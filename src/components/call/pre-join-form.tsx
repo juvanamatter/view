@@ -410,6 +410,16 @@ export function PreJoinForm({
                   required
                   autoFocus
                 />
+                <p className="text-xs text-muted-foreground">
+                  Já tem uma conta?{" "}
+                  <Link
+                    href={`/entrar?from=${encodeURIComponent(`/sala/${slug}`)}`}
+                    className="underline hover:text-foreground"
+                  >
+                    Entrar
+                  </Link>{" "}
+                  pra aparecer com seu nome e foto.
+                </p>
               </div>
             )}
             {hasPassword && (
