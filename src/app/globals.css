@@ -310,11 +310,22 @@
   --lk-control-bar-height: 0px;
 }
 
+/* .lk-participant-tile has no intrinsic width/height of its own — it normally
+   fills its cell only via CSS Grid's default item-stretch behavior. It stops
+   doing that once nested inside our own wrapper divs (FocusLayout's fullscreen
+   pane, the zoomable-tile wrapper), so we size it to its parent explicitly. */
 [data-lk-theme="reuniao"] .lk-participant-tile {
+  width: 100%;
+  height: 100%;
   background: oklch(0.27 0.055 300 / 68%);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid color-mix(in oklch, white 10%, transparent);
+}
+
+[data-lk-theme="reuniao"] .lk-focused-participant {
+  width: 100%;
+  height: 100%;
 }
 
 [data-lk-theme="reuniao"] .lk-participant-tile:has(.lk-participant-placeholder) {

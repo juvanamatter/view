@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { CarouselLayout, FocusLayout, GridLayout, useTracks } from "@livekit/components-react";
 import { Track } from "livekit-client";
 import { WhiteboardOverlay } from "./whiteboard-overlay";
-import { ParticipantTileWithAvatar } from "./participant-tile-with-avatar";
+import { ZoomableParticipantTile } from "./zoomable-participant-tile";
 import { FullscreenButton } from "./fullscreen-button";
 
 export function VideoConference() {
@@ -38,7 +38,7 @@ export function VideoConference() {
         {otherTracks.length > 0 && (
           <div className="h-28 shrink-0">
             <CarouselLayout tracks={otherTracks} orientation="horizontal" style={{ height: "100%" }}>
-              <ParticipantTileWithAvatar />
+              <ZoomableParticipantTile />
             </CarouselLayout>
           </div>
         )}
@@ -48,7 +48,7 @@ export function VideoConference() {
 
   return (
     <GridLayout tracks={tracks} style={{ height: "100%" }}>
-      <ParticipantTileWithAvatar />
+      <ZoomableParticipantTile />
     </GridLayout>
   );
 }
