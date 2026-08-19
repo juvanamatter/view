@@ -80,7 +80,7 @@ export function CallControls({
   const cam = useTrackToggle({ source: Track.Source.Camera });
   const screen = useTrackToggle({
     source: Track.Source.ScreenShare,
-    captureOptions: { audio: true },
+    captureOptions: { audio: true, contentHint: "detail" },
     onChange: (enabled, isUserInitiated) => {
       if (enabled && isUserInitiated && currentUserId) {
         fetch("/api/stats/screen-share", { method: "POST" }).catch(() => {});
