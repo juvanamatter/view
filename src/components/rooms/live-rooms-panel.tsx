@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Video } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 type LiveRoom = {
   slug: string;
@@ -48,6 +50,13 @@ function LiveRoomRow({ room }: { room: LiveRoom }) {
           {room.participants.map((p) => p.name).join(", ")}
         </p>
       </div>
+      <Button
+        size="sm"
+        className="shrink-0 bg-gradient-to-br from-fuchsia-500 to-purple-600"
+        render={<Link href={`/sala/${room.slug}`} />}
+      >
+        Entrar
+      </Button>
     </div>
   );
 }
