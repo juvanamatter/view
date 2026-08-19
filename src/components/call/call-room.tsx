@@ -19,7 +19,6 @@ import { WhiteboardRequestPanel } from "./whiteboard-request-panel";
 import { TranscriptionProvider, type TranscriptEntry } from "./transcription-context";
 import { HandRaiseProvider } from "./hand-raise-context";
 import { CallEndedScreen } from "./call-ended-screen";
-import { InactivityGuard } from "./inactivity-guard";
 import { PresenceHeartbeat } from "@/components/presence/presence-heartbeat";
 
 function PublishHandedOffTracks({
@@ -142,7 +141,6 @@ export function CallRoom({
       <RoomAudioRenderer />
       <UsageTracker userId={currentUserId} />
       {currentUserId && <PresenceHeartbeat />}
-      <InactivityGuard slug={session.room.slug} />
     </LiveKitRoom>
   );
 }
