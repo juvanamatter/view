@@ -94,7 +94,7 @@ export function CallRoom({
             <TranscriptionProvider onEntriesChange={handleEntriesChange}>
               <HandRaiseProvider>
                 <WaitingGate>
-                  <CallHeader roomName={session.room.name} />
+                  <CallHeader roomName={session.room.name} slug={session.room.slug} />
                   <div className="flex min-h-0 flex-1 px-4 pb-4">
                     <div className="min-h-0 min-w-0 flex-1 overflow-hidden rounded-2xl">
                       <VideoConference />

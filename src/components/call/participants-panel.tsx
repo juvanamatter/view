@@ -3,17 +3,21 @@
 import { useParticipants } from "@livekit/components-react";
 import { Mic, MicOff, Video, VideoOff, X } from "lucide-react";
 import { useHandRaise } from "./hand-raise-context";
+import { CopyLinkButton } from "@/components/shared/copy-link-button";
 import { cn } from "@/lib/utils";
 
 export function ParticipantsPanel({
   onClose,
   position = "above",
+  slug,
 }: {
   onClose: () => void;
   position?: "above" | "below";
+  slug: string;
 }) {
   const participants = useParticipants();
   const { raisedIdentities } = useHandRaise();
+  const alone = participants.length === 1;
 
   return (
     <div
@@ -53,6 +57,15 @@ export function ParticipantsPanel({
             </div>
           </div>
         ))}
+      </div>
+
+      <div className="border-t border-border pt-2">
+        {alone && (
+          <p className="mb-1.5 text-xs text-muted-foreground">
+            Você é a única pessoa aqui. Convide alguém pra entrar.
+          </p>
+        )}
+        <CopyLinkButton slug={slug} label="Copiar link da sala" className="w-full" />
       </div>
     </div>
   );
