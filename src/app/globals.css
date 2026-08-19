@@ -363,18 +363,6 @@
   box-shadow: 0 0 0 3px #fbbf24;
 }
 
-/* Grid tiles otherwise stretch to whatever rectangle the row/column split leaves
-   them, which can crop faces hard when there are few participants. Capping them
-   near-square and centering in the cell keeps people fully visible instead. */
-[data-lk-theme="reuniao"] .lk-grid-layout > .lk-tile-frame {
-  aspect-ratio: 4 / 3;
-  max-width: 100%;
-  max-height: 100%;
-  width: auto;
-  height: auto;
-  margin: auto;
-}
-
 /* LiveKit's own prev/next page control has no z-index of its own, so it was
    rendering underneath our (explicitly z-indexed) call toolbar and becoming
    unclickable. */
