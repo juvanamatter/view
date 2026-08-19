@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { getRoomBySlug } from "@/lib/queries/rooms";
 import { getCurrentUser } from "@/lib/auth";
 import { JoinRoomClient } from "@/components/call/join-room-client";
@@ -5,6 +6,10 @@ import { JoinRoomClient } from "@/components/call/join-room-client";
 export default async function RoomPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const [room, user] = await Promise.all([getRoomBySlug(slug), getCurrentUser()]);
+
+  if (!user) {
+    redirect(`/entrar?from=${encodeURIComponent(`/sala/${slug}`)}`);
+  }
 
   if (!room || !room.isActive) {
     return (
@@ -19,7 +24,7 @@ export default async function RoomPage({ params }: { params: Promise<{ slug: str
     );
   }
 
-  const canAdmit = user ? user.role === "ADMIN" || user.id === room.createdByUserId : false;
+  const canAdmit = user.role === "ADMIN" || user.id === room.createdByUserId;
 
   return (
     <JoinRoomClient
@@ -30,7 +35,7 @@ export default async function RoomPage({ params }: { params: Promise<{ slug: str
       defaultCameraOn={room.cameraOnEntry}
       defaultMicOn={!room.muteOnEntry}
       canAdmit={canAdmit}
-      currentUser={user ? { id: user.id, name: user.name } : null}
+      currentUser={{ id: user.id, name: user.name }}
     />
   );
 }

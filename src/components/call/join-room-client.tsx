@@ -5,7 +5,7 @@ import { PreJoinForm, type JoinChoices } from "./pre-join-form";
 import { CallRoom } from "./call-room";
 import type { CallSession } from "@/lib/call-types";
 
-type CurrentUser = { id: string; name: string } | null;
+type CurrentUser = { id: string; name: string };
 
 export function JoinRoomClient({
   slug,
@@ -33,7 +33,7 @@ export function JoinRoomClient({
       <CallRoom
         session={joined.session}
         canAdmit={canAdmit}
-        currentUserId={currentUser?.id ?? null}
+        currentUserId={currentUser.id}
         videoTrack={joined.choices.videoTrack}
         audioTrack={joined.choices.audioTrack}
       />
@@ -48,7 +48,7 @@ export function JoinRoomClient({
       waitingRoom={waitingRoom}
       defaultCameraOn={defaultCameraOn}
       defaultMicOn={defaultMicOn}
-      accountName={currentUser?.name ?? null}
+      accountName={currentUser.name}
       onJoined={(session, choices) => setJoined({ session, choices })}
     />
   );
