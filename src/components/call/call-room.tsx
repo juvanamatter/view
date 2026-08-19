@@ -12,6 +12,7 @@ import { CallControls } from "./call-controls";
 import { ChatPanel } from "./chat-panel";
 import { HostWaitingPanel } from "./host-waiting-panel";
 import { UsageTracker } from "./usage-tracker";
+import { PresenceHeartbeat } from "@/components/presence/presence-heartbeat";
 import { SoundboardProvider } from "./soundboard-context";
 import { BackgroundProvider } from "./background-context";
 import { WhiteboardProvider } from "./whiteboard-context";
@@ -122,6 +123,7 @@ export function CallRoom({
       </SoundboardProvider>
       <RoomAudioRenderer />
       <UsageTracker userId={currentUserId} />
+      {currentUserId && <PresenceHeartbeat />}
     </LiveKitRoom>
   );
 }
