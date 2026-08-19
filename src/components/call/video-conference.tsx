@@ -1,10 +1,11 @@
 "use client";
 
 import { useRef } from "react";
-import { CarouselLayout, FocusLayout, GridLayout, useTracks } from "@livekit/components-react";
+import { CarouselLayout, GridLayout, useTracks } from "@livekit/components-react";
 import { Track } from "livekit-client";
 import { WhiteboardOverlay } from "./whiteboard-overlay";
 import { ZoomableParticipantTile } from "./zoomable-participant-tile";
+import { ZoomableScreenShare } from "./zoomable-screen-share";
 import { FullscreenButton } from "./fullscreen-button";
 
 export function VideoConference() {
@@ -31,7 +32,7 @@ export function VideoConference() {
     return (
       <div className="flex size-full flex-col gap-2">
         <div ref={focusAreaRef} className="relative min-h-0 flex-1">
-          <FocusLayout trackRef={screenShareTrack} />
+          <ZoomableScreenShare trackRef={screenShareTrack} />
           <WhiteboardOverlay />
           <FullscreenButton targetRef={focusAreaRef} />
         </div>

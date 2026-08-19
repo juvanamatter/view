@@ -3,7 +3,7 @@
 import { useCallback, useRef, useState } from "react";
 import "@livekit/components-styles";
 import { LiveKitRoom, RoomAudioRenderer } from "@livekit/components-react";
-import { AudioPresets, VideoPresets } from "livekit-client";
+import { AudioPresets, ScreenSharePresets, VideoPresets } from "livekit-client";
 import type { CallSession } from "@/lib/call-types";
 import { WaitingGate } from "./waiting-gate";
 import { CallHeader } from "./call-header";
@@ -76,6 +76,8 @@ export function CallRoom({
         publishDefaults: {
           videoEncoding: VideoPresets.h720.encoding,
           videoSimulcastLayers: [VideoPresets.h180, VideoPresets.h360, VideoPresets.h720],
+          screenShareEncoding: ScreenSharePresets.h1080fps15.encoding,
+          screenShareSimulcastLayers: [ScreenSharePresets.h720fps5, ScreenSharePresets.h1080fps15],
           audioPreset: AudioPresets.musicHighQuality,
           dtx: true,
           red: true,
